@@ -1,15 +1,15 @@
 ---
-name: confidence-plan
-description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /confidence-loop:confidence-plan. Provides adversarial review of a plan document.
+name: plan
+description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /devils-advocate:plan. Provides adversarial review of a plan document.
 ---
 
-# Plan Confidence Review
+# Plan Review
 
-You are running a **plan review assessment**. Read the specified plan file and scrutinize it as a skeptical technical lead would before approving it for implementation.
+You are running a **plan review**. Read the specified plan file and scrutinize it as a skeptical technical lead would before approving it for implementation.
 
 ## Process
 
-1. **Read the plan file** — The user should provide a path as an argument (e.g., `/confidence-loop:confidence-plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
+1. **Read the plan file** — The user should provide a path as an argument (e.g., `/devils-advocate:plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
 
 2. **Evaluate against these dimensions** — Score each 0-100:
 
@@ -23,7 +23,7 @@ You are running a **plan review assessment**. Read the specified plan file and s
 
 4. **Calculate overall score** — Conservative weighted average. Plans with dependency ordering issues or missing steps should score below 70.
 
-5. **Write the session log entry** — Append to `.confidence-loop/session.md`:
+5. **Write the session log entry** — Append to `.devils-advocate/session.md`:
 
    ```markdown
    ## Check #N — Plan review | YYYY-MM-DD HH:MM
@@ -36,7 +36,7 @@ You are running a **plan review assessment**. Read the specified plan file and s
 ## Output Format
 
 ```
-PLAN CONFIDENCE REVIEW
+PLAN REVIEW
 ═══════════════════════════════════════
 
 Plan: [filename]

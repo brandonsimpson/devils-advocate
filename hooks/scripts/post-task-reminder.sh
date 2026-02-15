@@ -1,7 +1,7 @@
 #!/bin/sh
-# Post-task reminder to run confidence assessment
+# Post-task reminder to run devil's advocate review
 # Sandbox-safe: no writes, no network, just output
 
 echo ""
-echo "Confidence Loop: Task complete. Run /confidence-loop:confidence to assess this solution."
+echo "Devil's Advocate: Task complete. Run /devils-advocate:review to scrutinize this solution."
 echo ""

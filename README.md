@@ -1,4 +1,4 @@
-# confidence-loop
+# devils-advocate
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that adds adversarial self-review to every task. Claude scores its own work across multiple dimensions, identifies weaknesses, and proposes improvements — before you ship anything.
 
@@ -9,16 +9,16 @@ LLMs confidently produce wrong answers. This plugin forces Claude to argue again
 ## Install
 
 ```bash
-claude --plugin-dir /path/to/confidence-loop
+claude --plugin-dir /path/to/devils-advocate
 ```
 
 Clone this repo and point `--plugin-dir` at the directory. Skills will be available immediately.
 
 ## Commands
 
-### `/confidence-loop:confidence`
+### `/devils-advocate:review`
 
-Post-task confidence check. Scores the current solution across four dimensions:
+Post-task adversarial review. Scores the current solution across four dimensions:
 
 - **Correctness** — Does it actually solve the problem?
 - **Completeness** — Missing edge cases or gaps?
@@ -27,7 +27,7 @@ Post-task confidence check. Scores the current solution across four dimensions:
 
 Outputs a 0-100 score, strengths, weaknesses, and a "skeptical senior engineer" take. If the score is below 80, proposes specific improvements and waits for your approval.
 
-### `/confidence-loop:confidence-pre`
+### `/devils-advocate:pre`
 
 Pre-task forecast. Run this before starting work to evaluate:
 
@@ -37,27 +37,27 @@ Pre-task forecast. Run this before starting work to evaluate:
 
 Recommends whether to proceed, clarify first, or break into smaller tasks.
 
-### `/confidence-loop:confidence-plan <path>`
+### `/devils-advocate:plan <path>`
 
 Plan review. Point it at a design doc or implementation plan:
 
 ```
-/confidence-loop:confidence-plan docs/plans/my-plan.md
+/devils-advocate:plan docs/plans/my-plan.md
 ```
 
 Reviews completeness, feasibility, risk spots, gaps, and overscoping. Flags dependency ordering issues.
 
-### `/confidence-loop:confidence-log`
+### `/devils-advocate:log`
 
-Displays the session history of all confidence checks with total count, average score, and trend direction.
+Displays the session history of all checks with total count, average score, and trend direction.
 
 ## Session Log
 
-Every check is automatically logged to `.confidence-loop/session.md` in your project directory. This file is local to your project and should be gitignored — add `.confidence-loop/` to your `.gitignore`.
+Every check is automatically logged to `.devils-advocate/session.md` in your project directory. This file is local to your project and should be gitignored — add `.devils-advocate/` to your `.gitignore`.
 
 ## Post-Task Reminder
 
-A notification hook reminds you to run a confidence check whenever Claude finishes a task. The reminder is passive — it never auto-runs an assessment.
+A notification hook reminds you to run a review whenever Claude finishes a task. The reminder is passive — it never auto-runs an assessment.
 
 ## License
 

@@ -1,20 +1,20 @@
 ---
-name: confidence-log
-description: Use when the user asks to "show confidence log", "view confidence history", "show scores", "confidence session log", or invokes /confidence-loop:confidence-log. Displays the running session log of all confidence checks.
+name: log
+description: Use when the user asks to "show confidence log", "view confidence history", "show scores", "session log", or invokes /devils-advocate:log. Displays the running session log of all confidence checks.
 ---
 
-# Confidence Session Log Viewer
+# Session Log
 
 Display the confidence assessment history for this session.
 
 ## Process
 
-1. **Read the session log** — Use the Read tool to read `.confidence-loop/session.md` from the project root.
+1. **Read the session log** — Use the Read tool to read `.devils-advocate/session.md` from the project root.
 
-2. **If the file doesn't exist or is empty** — Report that no confidence checks have been run yet and suggest available commands:
-   - `/confidence-loop:confidence` — Assess current solution
-   - `/confidence-loop:confidence-pre` — Pre-task forecast
-   - `/confidence-loop:confidence-plan <path>` — Review a plan file
+2. **If the file doesn't exist or is empty** — Report that no checks have been run yet and suggest available commands:
+   - `/devils-advocate:review` — Review current solution
+   - `/devils-advocate:pre` — Pre-task forecast
+   - `/devils-advocate:plan <path>` — Review a plan file
 
 3. **If the file exists** — Display its contents and add a brief summary:
    - Total number of checks run
@@ -25,10 +25,10 @@ Display the confidence assessment history for this session.
 ## Output Format
 
 ```
-CONFIDENCE SESSION LOG
+SESSION LOG
 ═══════════════════════════════════════
 
-[contents of .confidence-loop/session.md]
+[contents of .devils-advocate/session.md]
 
 ───────────────────────────────────────
 Summary: N checks | Avg: XX/100 | Trend: [improving/declining/stable]

@@ -1,10 +1,11 @@
 {
-  "name": "confidence-loop",
-  "description": "Self-skeptical confidence scoring for Claude Code — adversarial self-review prompts that calculate confidence scores before, during, and after tasks",
-  "version": "1.0.0",
+  "name": "devils-advocate",
+  "description": "Adversarial self-review for Claude Code — forces Claude to argue against its own output, score confidence, and surface weaknesses before you ship",
+  "version": "2.0.0",
   "author": {
-    "name": "Brandon Simpson"
+    "name": "Brandon Simpson",
+    "url": "https://brandon.cc"
   },
   "license": "MIT",
-  "keywords": ["confidence", "scoring", "self-review", "quality", "assessment"]
+  "keywords": ["confidence", "scoring", "self-review", "quality", "devils-advocate"]
 }

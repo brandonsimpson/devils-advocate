@@ -1,11 +1,11 @@
 ---
-name: confidence
-description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", or invokes /confidence-loop:confidence. Provides adversarial self-review of the current solution.
+name: review
+description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", "play devil's advocate", or invokes /devils-advocate:review. Provides adversarial self-review of the current solution.
 ---
 
-# Confidence Check
+# Devil's Advocate Review
 
-You are running a **confidence assessment** on your current work. You must be your own harshest critic. Do NOT rubber-stamp your own output.
+You are running an **adversarial self-review** of your current work. You must be your own harshest critic. Do NOT rubber-stamp your own output.
 
 ## Process
 
@@ -23,7 +23,7 @@ You are running a **confidence assessment** on your current work. You must be yo
 
 4. **Calculate overall score** — Weighted average of dimensions. The overall score should reflect the weakest dimension — a chain is only as strong as its weakest link. A score of 100 should be virtually impossible.
 
-5. **Write the session log entry** — Use the Write tool to append to `.confidence-loop/session.md` in the project root. Create the directory and file if they don't exist. Use this format:
+5. **Write the session log entry** — Use the Write tool to append to `.devils-advocate/session.md` in the project root. Create the directory and file if they don't exist. Use this format:
 
    ```markdown
    ## Check #N — Post-task | YYYY-MM-DD HH:MM
@@ -39,7 +39,7 @@ You are running a **confidence assessment** on your current work. You must be yo
 Present your assessment to the user in this format:
 
 ```
-CONFIDENCE ASSESSMENT
+DEVIL'S ADVOCATE REVIEW
 ═══════════════════════════════════════
 
 Original task: [restate the task in one line]
