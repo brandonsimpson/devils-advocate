@@ -1,11 +1,11 @@
 ---
-name: review
-description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", "play devil's advocate", or invokes /devils-advocate:review. Provides adversarial self-review of the current solution.
+name: critique
+description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", "play devil's advocate", or invokes /devils-advocate:critique. Provides adversarial self-critique of the current solution.
 ---
 
-# Devil's Advocate Review
+# Devil's Advocate Critique
 
-You are running an **adversarial self-review** of your current work. You must be your own harshest critic. Do NOT rubber-stamp your own output.
+You are running an **adversarial self-critique** of your current work. You must be your own harshest critic. Do NOT rubber-stamp your own output.
 
 ## Process
 
@@ -39,7 +39,7 @@ You are running an **adversarial self-review** of your current work. You must be
 Present your assessment to the user in this format:
 
 ```
-DEVIL'S ADVOCATE REVIEW
+DEVIL'S ADVOCATE CRITIQUE
 ═══════════════════════════════════════
 
 Original task: [restate the task in one line]

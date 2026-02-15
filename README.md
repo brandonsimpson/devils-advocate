@@ -4,11 +4,13 @@
 
 # devils-advocate
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that adds adversarial self-review to every task. Claude scores its own work across multiple dimensions, identifies weaknesses, and proposes improvements — before you ship anything.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that adds adversarial self-critique to every task. Claude scores its own work across multiple dimensions, identifies weaknesses, and proposes improvements — before you ship anything.
 
 ## Why
 
-LLMs confidently produce wrong answers. This plugin forces Claude to argue against its own output, score its confidence, and surface concerns before you act on a response. A score of 100 is virtually impossible, and "no weaknesses found" is never accepted.
+LLMs confidently produce wrong answers. They never hesitate, never hedge, and present fabricated information with the same authority as accurate responses. This plugin was inspired by the ideas in [Confidently Wrong](https://brandon.cc/confidently-wrong) — it builds intentional friction and formalized skepticism directly into the AI-assisted development workflow.
+
+This plugin forces Claude to argue against its own output, score its confidence, and surface concerns before you act on a response. A score of 100 is virtually impossible, and "no weaknesses found" is never accepted.
 
 ## Install
 
@@ -36,9 +38,9 @@ claude --plugin-dir ~/.claude/plugins/devils-advocate
 
 ## Commands
 
-### `/devils-advocate:review`
+### `/devils-advocate:critique`
 
-Post-task adversarial review. Scores the current solution across four dimensions:
+Post-task adversarial critique. Scores the current solution across four dimensions:
 
 - **Correctness** — Does it actually solve the problem?
 - **Completeness** — Missing edge cases or gaps?
@@ -57,12 +59,12 @@ Pre-task forecast. Run this before starting work to evaluate:
 
 Recommends whether to proceed, clarify first, or break into smaller tasks.
 
-### `/devils-advocate:plan <path>`
+### `/devils-advocate:critique-plan <path>`
 
-Plan review. Point it at a design doc or implementation plan:
+Plan critique. Point it at a design doc or implementation plan:
 
 ```
-/devils-advocate:plan docs/plans/my-plan.md
+/devils-advocate:critique-plan docs/plans/my-plan.md
 ```
 
 Reviews completeness, feasibility, risk spots, gaps, and overscoping. Flags dependency ordering issues.
@@ -77,7 +79,7 @@ Every check is automatically logged to `.devils-advocate/session.md` in your pro
 
 ## Post-Task Reminder
 
-A notification hook reminds you to run a review whenever Claude finishes a task. The reminder is passive — it never auto-runs an assessment.
+A notification hook reminds you to run a critique whenever Claude finishes a task. The reminder is passive — it never auto-runs an assessment.
 
 ## License
 

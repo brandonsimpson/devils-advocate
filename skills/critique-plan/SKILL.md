@@ -1,15 +1,15 @@
 ---
-name: plan
-description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /devils-advocate:plan. Provides adversarial review of a plan document.
+name: critique-plan
+description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /devils-advocate:critique-plan. Provides adversarial critique of a plan document.
 ---
 
-# Plan Review
+# Plan Critique
 
-You are running a **plan review**. Read the specified plan file and scrutinize it as a skeptical technical lead would before approving it for implementation.
+You are running a **plan critique**. Read the specified plan file and scrutinize it as a skeptical technical lead would before approving it for implementation.
 
 ## Process
 
-1. **Read the plan file** — The user should provide a path as an argument (e.g., `/devils-advocate:plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
+1. **Read the plan file** — The user should provide a path as an argument (e.g., `/devils-advocate:critique-plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
 
 2. **Evaluate against these dimensions** — Score each 0-100:
 
@@ -26,7 +26,7 @@ You are running a **plan review**. Read the specified plan file and scrutinize i
 5. **Write the session log entry** — Append to `.devils-advocate/session.md`:
 
    ```markdown
-   ## Check #N — Plan review | YYYY-MM-DD HH:MM
+   ## Check #N — Plan critique | YYYY-MM-DD HH:MM
    - **Plan:** [filename]
    - **Score:** XX/100
    - **Summary:** [2-3 sentence assessment]
@@ -36,7 +36,7 @@ You are running a **plan review**. Read the specified plan file and scrutinize i
 ## Output Format
 
 ```
-PLAN REVIEW
+PLAN CRITIQUE
 ═══════════════════════════════════════
 
 Plan: [filename]

@@ -12,9 +12,9 @@ Display the confidence assessment history for this session.
 1. **Read the session log** — Use the Read tool to read `.devils-advocate/session.md` from the project root.
 
 2. **If the file doesn't exist or is empty** — Report that no checks have been run yet and suggest available commands:
-   - `/devils-advocate:review` — Review current solution
+   - `/devils-advocate:critique` — Critique current solution
    - `/devils-advocate:pre` — Pre-task forecast
-   - `/devils-advocate:plan <path>` — Review a plan file
+   - `/devils-advocate:critique-plan <path>` — Review a plan file
 
 3. **If the file exists** — Display its contents and add a brief summary:
    - Total number of checks run
