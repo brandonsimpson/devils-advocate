@@ -12,11 +12,27 @@ LLMs confidently produce wrong answers. This plugin forces Claude to argue again
 
 ## Install
 
+Clone the repo:
+
 ```bash
-claude --plugin-dir /path/to/devils-advocate
+git clone https://github.com/brandonsimpson/devils-advocate.git ~/.claude/plugins/devils-advocate
 ```
 
-Clone this repo and point `--plugin-dir` at the directory. Skills will be available immediately.
+Then add it to your Claude Code settings (`~/.claude/settings.json`):
+
+```json
+{
+  "plugins": [
+    "~/.claude/plugins/devils-advocate"
+  ]
+}
+```
+
+Or install for a single session:
+
+```bash
+claude --plugin-dir ~/.claude/plugins/devils-advocate
+```
 
 ## Commands
 
