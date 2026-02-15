@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="banner.png" alt="Devil's Advocate" width="100%">
+</p>
+
 # devils-advocate
 
 A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that adds adversarial self-review to every task. Claude scores its own work across multiple dimensions, identifies weaknesses, and proposes improvements — before you ship anything.
