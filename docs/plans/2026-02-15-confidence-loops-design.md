@@ -18,7 +18,7 @@ The LLM becomes its own devil's advocate: it must argue against its own output, 
 ### Plugin Structure
 
 ```
-confidence-loops/
+confidence-loop/
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin manifest
 ├── skills/
@@ -142,6 +142,21 @@ All confidence checks are recorded in `.confidence-loop/session.md` within the p
 3. Score < 80 triggers improvement suggestions presented for user approval
 4. User must approve before any corrective iteration occurs (suggest + confirm model)
 5. Each check is logged to the session log with timestamp and check type
+
+## Validation
+
+To verify the plugin is working correctly:
+
+1. **Load the plugin:** `claude --plugin-dir /path/to/confidence-loop`
+2. **Check skill registration:** All four slash commands should appear in the available skills list in the system prompt
+3. **Run each command:** Verify each produces the expected output format (score table, strengths/weaknesses, session log entry)
+4. **Check session log:** After running a check, verify `.confidence-loop/session.md` was created with the correct entry format
+5. **Check hook:** After Claude completes a task, verify the post-task reminder message appears
+
+**Structural checks** (can be run without Claude Code):
+- `plugin.json` and `hooks.json` are valid JSON
+- `hooks/scripts/post-task-reminder.sh` is executable
+- All four `SKILL.md` files have valid YAML frontmatter with `name` and `description` fields
 
 ## Design Decisions
 

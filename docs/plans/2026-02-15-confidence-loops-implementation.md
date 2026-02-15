@@ -563,16 +563,15 @@ Expected: `Executable`
 Run: `./hooks/scripts/post-task-reminder.sh`
 Expected: Shows the reminder message containing "Confidence Loop: Task complete."
 
-**Step 6: Test plugin installation**
+**Step 6: Test plugin loading**
 
-Install the plugin locally by adding it to a Claude Code project:
+Load the plugin locally using the `--plugin-dir` flag:
 
 ```bash
-# From a test project directory:
-claude mcp add-plugin /path/to/confidence-loops
+claude --plugin-dir /path/to/confidence-loop
 ```
 
-Then start a new Claude Code session and verify that:
+Then verify in the session that:
 - `/confidence-loop:confidence` appears as an available skill
 - `/confidence-loop:confidence-pre` appears as an available skill
 - `/confidence-loop:confidence-plan` appears as an available skill
