@@ -1,2 +1,6 @@
-# Confidence Loop session data (generated in user projects)
+# Session data (generated in user projects)
 .confidence-loop/
+
+# Internal dev files
+docs/
+.claude/

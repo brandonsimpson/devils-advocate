@@ -1,54 +1,63 @@
 # confidence-loop
 
-Self-skeptical confidence scoring for Claude Code. Adversarial self-review prompts that force Claude to argue against its own output, identify weaknesses, and surface concerns before presenting a confidence score.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that adds adversarial self-review to every task. Claude scores its own work across multiple dimensions, identifies weaknesses, and proposes improvements — before you ship anything.
 
-## Installation
+## Why
 
-Load the plugin during development:
+LLMs confidently produce wrong answers. This plugin forces Claude to argue against its own output, score its confidence, and surface concerns before you act on a response. A score of 100 is virtually impossible, and "no weaknesses found" is never accepted.
+
+## Install
 
 ```bash
 claude --plugin-dir /path/to/confidence-loop
 ```
 
+Clone this repo and point `--plugin-dir` at the directory. Skills will be available immediately.
+
 ## Commands
 
 ### `/confidence-loop:confidence`
 
-Run a post-task confidence check on the current solution. Scores across correctness, completeness, assumptions, and fragility. Always identifies at least one weakness — "no weaknesses" is never accepted.
+Post-task confidence check. Scores the current solution across four dimensions:
 
-When the score is below 80, suggests specific improvements and waits for your approval before acting.
+- **Correctness** — Does it actually solve the problem?
+- **Completeness** — Missing edge cases or gaps?
+- **Assumptions** — What was assumed that wasn't stated?
+- **Fragility** — Would it break under reasonable input variations?
+
+Outputs a 0-100 score, strengths, weaknesses, and a "skeptical senior engineer" take. If the score is below 80, proposes specific improvements and waits for your approval.
 
 ### `/confidence-loop:confidence-pre`
 
-Run a pre-task forecast before work begins. Evaluates clarity, feasibility, and predicted pitfalls. Recommends whether to proceed, clarify first, or break into smaller tasks.
+Pre-task forecast. Run this before starting work to evaluate:
+
+- **Clarity** — Is the request specific enough?
+- **Feasibility** — Can an LLM do this well?
+- **Risk** — Where are errors most likely?
+
+Recommends whether to proceed, clarify first, or break into smaller tasks.
 
 ### `/confidence-loop:confidence-plan <path>`
 
-Review a plan file (design doc, implementation plan) as a skeptical technical lead. Checks completeness, feasibility, risk spots, gaps, and overscoping. Flags dependency ordering issues.
+Plan review. Point it at a design doc or implementation plan:
 
 ```
 /confidence-loop:confidence-plan docs/plans/my-plan.md
 ```
 
+Reviews completeness, feasibility, risk spots, gaps, and overscoping. Flags dependency ordering issues.
+
 ### `/confidence-loop:confidence-log`
 
-Display the session log showing all confidence scores, with a summary of total checks, average score, and trend direction.
-
-## How It Works
-
-Each confidence check:
-
-1. Evaluates the work against specific dimensions (scored 0-100 each)
-2. Calculates a weighted overall score anchored to the weakest dimension
-3. Identifies at least one genuine weakness or concern
-4. Logs the result to `.confidence-loop/session.md` in the project directory
-5. If score < 80, proposes improvements and waits for approval
-
-A post-task notification hook reminds you to run a confidence check when Claude finishes a task.
+Displays the session history of all confidence checks with total count, average score, and trend direction.
 
 ## Session Log
 
-All checks are recorded in `.confidence-loop/session.md` (gitignored by default). Use `/confidence-loop:confidence-log` to view the history and trends.
+Every check is automatically logged to `.confidence-loop/session.md` in your project directory. This file is local to your project and should be gitignored — add `.confidence-loop/` to your `.gitignore`.
+
+## Post-Task Reminder
+
+A notification hook reminds you to run a confidence check whenever Claude finishes a task. The reminder is passive — it never auto-runs an assessment.
 
 ## License
 
