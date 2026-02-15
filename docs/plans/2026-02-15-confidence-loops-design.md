@@ -19,30 +19,39 @@ The LLM becomes its own devil's advocate: it must argue against its own output, 
 
 ```
 confidence-loops/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest
 ├── skills/
-│   ├── confidence-check.md      # On-demand /confidence slash command
-│   ├── confidence-pre-task.md   # Pre-task assessment (hook-triggered)
-│   └── confidence-post-task.md  # Post-task assessment (hook-triggered)
+│   ├── confidence/
+│   │   └── SKILL.md             # On-demand /confidence-loop:confidence
+│   ├── confidence-pre/
+│   │   └── SKILL.md             # Pre-task assessment (/confidence-loop:confidence-pre)
+│   ├── confidence-plan/
+│   │   └── SKILL.md             # Plan review (/confidence-loop:confidence-plan)
+│   └── confidence-log/
+│       └── SKILL.md             # Session log viewer (/confidence-loop:confidence-log)
 ├── hooks/
-│   └── confidence-hooks.sh      # Hook script for auto-triggers
-├── settings.json                # Plugin config (hooks registration)
-├── package.json                 # Plugin manifest
-└── README.md
+│   ├── hooks.json               # Hook configuration
+│   └── scripts/
+│       └── post-task-reminder.sh # Post-task notification reminder
+├── docs/
+│   └── plans/                   # Design and implementation documents
+└── .gitignore
 ```
 
 ### Sandbox Constraints
 
 All operations are scoped to the user's project directory:
 
-- Session logs write to `.confidence-loops/session.md` within the current working directory
+- Session logs write to `.confidence-loop/session.md` within the current working directory
 - No writes outside the project boundary
 - No network calls or elevated permissions
 - No external dependencies — hook script is pure shell
-- `.confidence-loops/` directory should be added to `.gitignore` by convention
+- `.confidence-loop/` directory should be added to `.gitignore` by convention
 
 ## Slash Commands
 
-### `/confidence`
+### `/confidence-loop:confidence`
 
 Run a confidence check against the current state of the conversation/solution.
 
@@ -59,7 +68,7 @@ Run a confidence check against the current state of the conversation/solution.
 
 When the score is below the threshold (default: 80), the plugin lists specific concerns and proposes improvements. The user must approve before any iteration occurs.
 
-### `/confidence pre`
+### `/confidence-loop:confidence-pre`
 
 Run a pre-task assessment before work begins. Evaluates the task itself, not a solution.
 
@@ -70,7 +79,7 @@ Run a pre-task assessment before work begins. Evaluates the task itself, not a s
 
 **Output:** 0-100 confidence forecast + summary of concerns and predicted difficulty.
 
-### `/confidence plan <path>`
+### `/confidence-loop:confidence-plan <path>`
 
 Run a confidence assessment against a plan file (e.g., a design doc or implementation plan).
 
@@ -83,28 +92,25 @@ Run a confidence assessment against a plan file (e.g., a design doc or implement
 
 **Output:** 0-100 confidence score + summary. Logged as a "Plan review" check type.
 
-### `/confidence log`
+### `/confidence-loop:confidence-log`
 
 Display the session log showing all confidence scores from the current session.
 
 ## Hooks & Automation
 
-### Post-task Auto-assessment
+### Post-task Reminder
 
-A `Notification` hook triggers the post-task confidence assessment automatically when Claude finishes a task. The hook script:
+A `Notification` hook reminds the user to run a confidence check when Claude finishes a task. The hook script outputs a message suggesting the user invoke `/confidence-loop:confidence`.
 
-1. Ensures the `.confidence-loops/` directory exists
-2. Injects a prompt that triggers the post-task confidence skill
-
-The hook is registered in `settings.json` and calls `hooks/confidence-hooks.sh`.
+The hook is registered in `hooks/hooks.json` and calls `hooks/scripts/post-task-reminder.sh`. It does not auto-run the assessment — the user decides whether to invoke it.
 
 ### Pre-task
 
-Pre-task assessment is manual — the user invokes `/confidence pre` before starting work. There is no reliable "before first prompt" hook event in Claude Code.
+Pre-task assessment is manual — the user invokes `/confidence-loop:confidence-pre` before starting work. There is no reliable "before first prompt" hook event in Claude Code.
 
 ## Session Log
 
-All confidence checks are recorded in `.confidence-loops/session.md` within the project directory.
+All confidence checks are recorded in `.confidence-loop/session.md` within the project directory.
 
 **Format:**
 
@@ -147,4 +153,4 @@ All confidence checks are recorded in `.confidence-loops/session.md` within the 
 | Low confidence action | Suggest + confirm | Human stays in the loop |
 | Session tracking | Session log in project dir | Sandbox-safe; no global state |
 | Pre-task trigger | Manual slash command | No reliable pre-prompt hook exists |
-| Post-task trigger | Notification hook | Automatic; fires when Claude signals completion |
+| Post-task trigger | Notification hook | Fires when Claude signals completion; reminds user to run confidence check |

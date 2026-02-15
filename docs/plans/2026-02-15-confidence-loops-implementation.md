@@ -4,7 +4,7 @@
 
 **Goal:** Build a Claude Code plugin that provides self-skeptical confidence scoring through adversarial self-review prompts, with on-demand slash commands and automated post-task hooks.
 
-**Architecture:** A pure Claude Code plugin composed of skill files (markdown prompts), a hooks configuration, and a minimal shell script. All assessment logic lives in the skill prompts. Session state is tracked in a `.confidence-loops/session.md` file scoped to the user's project directory.
+**Architecture:** A pure Claude Code plugin composed of skill files (markdown prompts), a hooks configuration, and a minimal shell script. All assessment logic lives in the skill prompts. Session state is tracked in a `.confidence-loop/session.md` file scoped to the user's project directory.
 
 **Tech Stack:** Claude Code plugin system (skills, hooks), shell script (POSIX sh), markdown
 
@@ -19,7 +19,7 @@
 
 ```json
 {
-  "name": "confidence-loops",
+  "name": "confidence-loop",
   "description": "Self-skeptical confidence scoring for Claude Code — adversarial self-review prompts that calculate confidence scores before, during, and after tasks",
   "version": "1.0.0",
   "author": {
@@ -34,7 +34,7 @@
 
 Run:
 ```bash
-mkdir -p skills/confidence/scripts
+mkdir -p skills/confidence
 mkdir -p skills/confidence-pre
 mkdir -p skills/confidence-plan
 mkdir -p skills/confidence-log
@@ -52,7 +52,7 @@ git commit -m "feat: add plugin manifest and directory structure"
 
 ### Task 2: Create the confidence check skill (on-demand assessment)
 
-This is the core skill — the main `/confidence-loops:confidence` slash command that evaluates the current solution.
+This is the core skill — the main `/confidence-loop:confidence` slash command that evaluates the current solution.
 
 **Files:**
 - Create: `skills/confidence/SKILL.md`
@@ -66,7 +66,7 @@ The skill file contains the adversarial self-review prompt with scoring rubric, 
 ~~~markdown
 ---
 name: confidence
-description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", or invokes /confidence-loops:confidence. Provides adversarial self-review of the current solution.
+description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", or invokes /confidence-loop:confidence. Provides adversarial self-review of the current solution.
 ---
 
 # Confidence Check
@@ -89,7 +89,7 @@ You are running a **confidence assessment** on your current work. You must be yo
 
 4. **Calculate overall score** — Weighted average of dimensions. The overall score should reflect the weakest dimension — a chain is only as strong as its weakest link. A score of 100 should be virtually impossible.
 
-5. **Write the session log entry** — Use the Write tool to append to `.confidence-loops/session.md` in the project root. Create the directory and file if they don't exist. Use this format:
+5. **Write the session log entry** — Use the Write tool to append to `.confidence-loop/session.md` in the project root. Create the directory and file if they don't exist. Use this format:
 
    ```markdown
    ## Check #N — Post-task | YYYY-MM-DD HH:MM
@@ -167,7 +167,7 @@ git commit -m "feat: add core confidence check skill with adversarial self-revie
 
 ### Task 3: Create the pre-task assessment skill
 
-The `/confidence-loops:confidence-pre` slash command that forecasts task difficulty before work begins.
+The `/confidence-loop:confidence-pre` slash command that forecasts task difficulty before work begins.
 
 **Files:**
 - Create: `skills/confidence-pre/SKILL.md`
@@ -179,7 +179,7 @@ The `/confidence-loops:confidence-pre` slash command that forecasts task difficu
 ~~~markdown
 ---
 name: confidence-pre
-description: Use when the user asks to "assess before starting", "pre-task check", "forecast difficulty", "can you handle this", "how hard is this", "predict confidence", or invokes /confidence-loops:confidence-pre. Provides a pre-flight assessment before work begins.
+description: Use when the user asks to "assess before starting", "pre-task check", "forecast difficulty", "can you handle this", "how hard is this", "predict confidence", or invokes /confidence-loop:confidence-pre. Provides a pre-flight assessment before work begins.
 ---
 
 # Pre-Task Confidence Forecast
@@ -209,7 +209,7 @@ You are running a **pre-task assessment** to forecast how likely you are to comp
 
 5. **Calculate confidence forecast** — Score 0-100. This is a PREDICTION, not a post-hoc evaluation. Be conservative. Weight feasibility and pitfall risk heavily.
 
-6. **Write the session log entry** — Use the Write tool to append to `.confidence-loops/session.md` in the project root. Create the directory and file if they don't exist:
+6. **Write the session log entry** — Use the Write tool to append to `.confidence-loop/session.md` in the project root. Create the directory and file if they don't exist:
 
    ```markdown
    ## Check #N — Pre-task | YYYY-MM-DD HH:MM
@@ -266,7 +266,7 @@ git commit -m "feat: add pre-task confidence forecast skill"
 
 ### Task 4: Create the plan review skill
 
-The `/confidence-loops:confidence-plan` slash command that scrutinizes plan files.
+The `/confidence-loop:confidence-plan` slash command that scrutinizes plan files.
 
 **Files:**
 - Create: `skills/confidence-plan/SKILL.md`
@@ -278,7 +278,7 @@ The `/confidence-loops:confidence-plan` slash command that scrutinizes plan file
 ~~~markdown
 ---
 name: confidence-plan
-description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /confidence-loops:confidence-plan. Provides adversarial review of a plan document.
+description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /confidence-loop:confidence-plan. Provides adversarial review of a plan document.
 ---
 
 # Plan Confidence Review
@@ -287,7 +287,7 @@ You are running a **plan review assessment**. Read the specified plan file and s
 
 ## Process
 
-1. **Read the plan file** — The user should provide a path as an argument (e.g., `/confidence-loops:confidence-plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
+1. **Read the plan file** — The user should provide a path as an argument (e.g., `/confidence-loop:confidence-plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
 
 2. **Evaluate against these dimensions** — Score each 0-100:
 
@@ -301,7 +301,7 @@ You are running a **plan review assessment**. Read the specified plan file and s
 
 4. **Calculate overall score** — Conservative weighted average. Plans with dependency ordering issues or missing steps should score below 70.
 
-5. **Write the session log entry** — Append to `.confidence-loops/session.md`:
+5. **Write the session log entry** — Append to `.confidence-loop/session.md`:
 
    ```markdown
    ## Check #N — Plan review | YYYY-MM-DD HH:MM
@@ -366,7 +366,7 @@ git commit -m "feat: add plan review confidence skill"
 
 ### Task 5: Create the session log viewer skill
 
-The `/confidence-loops:confidence-log` slash command that displays the session history.
+The `/confidence-loop:confidence-log` slash command that displays the session history.
 
 **Files:**
 - Create: `skills/confidence-log/SKILL.md`
@@ -378,7 +378,7 @@ The `/confidence-loops:confidence-log` slash command that displays the session h
 ~~~markdown
 ---
 name: confidence-log
-description: Use when the user asks to "show confidence log", "view confidence history", "show scores", "confidence session log", or invokes /confidence-loops:confidence-log. Displays the running session log of all confidence checks.
+description: Use when the user asks to "show confidence log", "view confidence history", "show scores", "confidence session log", or invokes /confidence-loop:confidence-log. Displays the running session log of all confidence checks.
 ---
 
 # Confidence Session Log Viewer
@@ -387,12 +387,12 @@ Display the confidence assessment history for this session.
 
 ## Process
 
-1. **Read the session log** — Use the Read tool to read `.confidence-loops/session.md` from the project root.
+1. **Read the session log** — Use the Read tool to read `.confidence-loop/session.md` from the project root.
 
 2. **If the file doesn't exist or is empty** — Report that no confidence checks have been run yet and suggest available commands:
-   - `/confidence-loops:confidence` — Assess current solution
-   - `/confidence-loops:confidence-pre` — Pre-task forecast
-   - `/confidence-loops:confidence-plan <path>` — Review a plan file
+   - `/confidence-loop:confidence` — Assess current solution
+   - `/confidence-loop:confidence-pre` — Pre-task forecast
+   - `/confidence-loop:confidence-plan <path>` — Review a plan file
 
 3. **If the file exists** — Display its contents and add a brief summary:
    - Total number of checks run
@@ -406,7 +406,7 @@ Display the confidence assessment history for this session.
 CONFIDENCE SESSION LOG
 ═══════════════════════════════════════
 
-[contents of .confidence-loops/session.md]
+[contents of .confidence-loop/session.md]
 
 ───────────────────────────────────────
 Summary: N checks | Avg: XX/100 | Trend: [improving/declining/stable]
@@ -473,7 +473,7 @@ A `Notification` hook that reminds the user to run a confidence check when a tas
 # Sandbox-safe: no writes, no network, just output
 
 echo ""
-echo "Confidence Loops: Task complete. Run /confidence-loops:confidence to assess this solution."
+echo "Confidence Loop: Task complete. Run /confidence-loop:confidence to assess this solution."
 echo ""
 ```
 
@@ -497,7 +497,7 @@ git commit -m "feat: add post-task notification hook with reminder"
 
 ### Task 7: Add .gitignore for session logs
 
-Ensure `.confidence-loops/` directories in user projects don't get committed.
+Ensure `.confidence-loop/` directories in user projects don't get committed.
 
 **Files:**
 - Create: `.gitignore`
@@ -507,8 +507,8 @@ Ensure `.confidence-loops/` directories in user projects don't get committed.
 `.gitignore`:
 
 ```
-# Confidence Loops session data (generated in user projects)
-.confidence-loops/
+# Confidence Loop session data (generated in user projects)
+.confidence-loop/
 ```
 
 **Step 2: Commit**
@@ -528,9 +528,10 @@ Verify the plugin works end-to-end by installing it locally and running each ski
 
 Run: `find . -type f | sort | grep -v '.git/'`
 
-Expected output should match:
+Expected output should include:
 ```
 ./.claude-plugin/plugin.json
+./.claude/settings.local.json
 ./.gitignore
 ./docs/plans/2026-02-15-confidence-loops-design.md
 ./docs/plans/2026-02-15-confidence-loops-implementation.md
@@ -560,15 +561,24 @@ Expected: `Executable`
 **Step 5: Run the hook script to verify output**
 
 Run: `./hooks/scripts/post-task-reminder.sh`
-Expected: Shows the reminder message
+Expected: Shows the reminder message containing "Confidence Loop: Task complete."
 
 **Step 6: Test plugin installation**
 
-Install the plugin locally in Claude Code and verify that:
-- `/confidence-loops:confidence` appears as an available skill
-- `/confidence-loops:confidence-pre` appears as an available skill
-- `/confidence-loops:confidence-plan` appears as an available skill
-- `/confidence-loops:confidence-log` appears as an available skill
+Install the plugin locally by adding it to a Claude Code project:
+
+```bash
+# From a test project directory:
+claude mcp add-plugin /path/to/confidence-loops
+```
+
+Then start a new Claude Code session and verify that:
+- `/confidence-loop:confidence` appears as an available skill
+- `/confidence-loop:confidence-pre` appears as an available skill
+- `/confidence-loop:confidence-plan` appears as an available skill
+- `/confidence-loop:confidence-log` appears as an available skill
+
+Run each skill and confirm it produces the expected output format.
 
 **Step 7: Commit any fixes**
 
