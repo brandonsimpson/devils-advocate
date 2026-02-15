@@ -3,5 +3,5 @@
 # Sandbox-safe: no writes, no network, just output
 
 echo ""
-echo "Confidence Loops: Task complete. Run /confidence-loops:confidence to assess this solution."
+echo "Confidence Loop: Task complete. Run /confidence-loop:confidence to assess this solution."
 echo ""

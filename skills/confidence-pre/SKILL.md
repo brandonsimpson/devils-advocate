@@ -1,6 +1,6 @@
 ---
 name: confidence-pre
-description: Use when the user asks to "assess before starting", "pre-task check", "forecast difficulty", "can you handle this", "how hard is this", "predict confidence", or invokes /confidence-loops:confidence-pre. Provides a pre-flight assessment before work begins.
+description: Use when the user asks to "assess before starting", "pre-task check", "forecast difficulty", "can you handle this", "how hard is this", "predict confidence", or invokes /confidence-loop:confidence-pre. Provides a pre-flight assessment before work begins.
 ---
 
 # Pre-Task Confidence Forecast
@@ -30,7 +30,7 @@ You are running a **pre-task assessment** to forecast how likely you are to comp
 
 5. **Calculate confidence forecast** — Score 0-100. This is a PREDICTION, not a post-hoc evaluation. Be conservative. Weight feasibility and pitfall risk heavily.
 
-6. **Write the session log entry** — Use the Write tool to append to `.confidence-loops/session.md` in the project root. Create the directory and file if they don't exist:
+6. **Write the session log entry** — Use the Write tool to append to `.confidence-loop/session.md` in the project root. Create the directory and file if they don't exist:
 
    ```markdown
    ## Check #N — Pre-task | YYYY-MM-DD HH:MM

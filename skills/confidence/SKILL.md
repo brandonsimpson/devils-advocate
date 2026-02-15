@@ -1,6 +1,6 @@
 ---
 name: confidence
-description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", or invokes /confidence-loops:confidence. Provides adversarial self-review of the current solution.
+description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", or invokes /confidence-loop:confidence. Provides adversarial self-review of the current solution.
 ---
 
 # Confidence Check
@@ -23,7 +23,7 @@ You are running a **confidence assessment** on your current work. You must be yo
 
 4. **Calculate overall score** — Weighted average of dimensions. The overall score should reflect the weakest dimension — a chain is only as strong as its weakest link. A score of 100 should be virtually impossible.
 
-5. **Write the session log entry** — Use the Write tool to append to `.confidence-loops/session.md` in the project root. Create the directory and file if they don't exist. Use this format:
+5. **Write the session log entry** — Use the Write tool to append to `.confidence-loop/session.md` in the project root. Create the directory and file if they don't exist. Use this format:
 
    ```markdown
    ## Check #N — Post-task | YYYY-MM-DD HH:MM
