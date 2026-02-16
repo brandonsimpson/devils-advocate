@@ -1,6 +1,6 @@
 ---
 name: pre
-description: Use when the user asks to "assess before starting", "pre-task check", "forecast difficulty", "can you handle this", "how hard is this", "predict confidence", or invokes /devils-advocate:pre. Provides a pre-flight assessment before work begins.
+description: Pre-flight assessment before work begins. Triggers: "pre-task check", "forecast difficulty", "how hard is this".
 ---
 
 # Pre-Task Forecast

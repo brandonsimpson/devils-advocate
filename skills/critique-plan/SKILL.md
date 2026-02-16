@@ -1,6 +1,6 @@
 ---
 name: critique-plan
-description: Use when the user asks to "review a plan", "check plan confidence", "assess this plan", "scrutinize the plan", "evaluate implementation plan", or invokes /devils-advocate:critique-plan. Provides adversarial critique of a plan document.
+description: Adversarial critique of a plan document. Triggers: "review a plan", "assess this plan", "scrutinize the plan".
 ---
 
 # Plan Critique

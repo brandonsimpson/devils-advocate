@@ -1,6 +1,6 @@
 ---
 name: second-opinion
-description: Use when the user asks for a "second opinion", "re-critique", "double check", "review the review", or invokes /devils-advocate:second-opinion. Re-critiques work from a different adversarial angle and compares with the previous critique.
+description: Re-critique from a different adversarial angle. Triggers: "second opinion", "re-critique", "double check".
 ---
 
 # Second Opinion

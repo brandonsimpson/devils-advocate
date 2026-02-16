@@ -1,6 +1,6 @@
 ---
 name: log
-description: Use when the user asks to "show confidence log", "view confidence history", "show scores", "session log", or invokes /devils-advocate:log. Displays the running session log of all confidence checks.
+description: Display session log of all confidence checks. Triggers: "show confidence log", "show scores", "session log".
 ---
 
 # Session Log

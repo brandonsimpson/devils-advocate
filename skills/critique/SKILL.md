@@ -1,6 +1,6 @@
 ---
 name: critique
-description: Use when the user asks to "check confidence", "run confidence check", "assess solution", "how confident are you", "score this answer", "evaluate accuracy", "rate your confidence", "scrutinize this", "play devil's advocate", or invokes /devils-advocate:critique. Provides adversarial self-critique of the current solution.
+description: Adversarial self-critique of the current solution. Triggers: "check confidence", "assess solution", "scrutinize this", "play devil's advocate".
 ---
 
 # Devil's Advocate Critique
