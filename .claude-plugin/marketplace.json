@@ -5,7 +5,7 @@
   },
   "owner": {
     "name": "Brandon Simpson",
-    "url": "https://brandon.cc"
+    "email": ""
   },
   "plugins": [
     {
@@ -15,7 +15,7 @@
         "repo": "brandonsimpson/devils-advocate"
       },
       "description": "Adversarial self-critique for Claude Code — forces Claude to argue against its own output, score confidence, and surface weaknesses before you ship",
-      "version": "2.0.0"
+      "version": "2.0.1"
     }
   ]
 }
