@@ -14,6 +14,17 @@ This plugin forces Claude to argue against its own output, score its confidence,
 
 ## Install
 
+### Via plugin marketplace (recommended)
+
+In Claude Code, add the marketplace and install:
+
+```
+/plugin marketplace add brandonsimpson/devils-advocate
+/plugin install devils-advocate@devils-advocate
+```
+
+### Manual install
+
 Clone the repo:
 
 ```bash

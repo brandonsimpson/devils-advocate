@@ -1,11 +1,11 @@
 {
   "name": "devils-advocate",
-  "description": "Adversarial self-review for Claude Code — forces Claude to argue against its own output, score confidence, and surface weaknesses before you ship",
+  "description": "Adversarial self-critique for Claude Code — forces Claude to argue against its own output, score confidence, and surface weaknesses before you ship",
   "version": "2.0.0",
   "author": {
     "name": "Brandon Simpson",
     "url": "https://brandon.cc"
   },
   "license": "MIT",
-  "keywords": ["confidence", "scoring", "self-review", "quality", "devils-advocate"]
+  "keywords": ["confidence", "scoring", "self-critique", "quality", "devils-advocate"]
 }
