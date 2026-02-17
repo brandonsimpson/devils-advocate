@@ -1,6 +1,6 @@
 ---
 name: critique
-description: Adversarial self-critique of the current solution. Triggers: "check confidence", "assess solution", "scrutinize this", "play devil's advocate".
+description: Adversarial self-critique of the current solution.
 ---
 
 # Devil's Advocate Critique

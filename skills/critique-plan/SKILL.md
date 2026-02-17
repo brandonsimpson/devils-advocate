@@ -1,6 +1,6 @@
 ---
 name: critique-plan
-description: Adversarial critique of a plan document. Triggers: "review a plan", "assess this plan", "scrutinize the plan".
+description: Adversarial critique of a plan document.
 ---
 
 # Plan Critique

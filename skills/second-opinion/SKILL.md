@@ -1,6 +1,6 @@
 ---
 name: second-opinion
-description: Re-critique from a different adversarial angle. Triggers: "second opinion", "re-critique", "double check".
+description: Re-critique from a harsher adversarial angle.
 ---
 
 # Second Opinion

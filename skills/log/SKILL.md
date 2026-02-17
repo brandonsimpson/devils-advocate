@@ -1,6 +1,6 @@
 ---
 name: log
-description: Display session log of all confidence checks. Triggers: "show confidence log", "show scores", "session log".
+description: Display session log of all checks and scores.
 ---
 
 # Session Log

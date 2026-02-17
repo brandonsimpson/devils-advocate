@@ -1,6 +1,6 @@
 ---
 name: pre
-description: Pre-flight assessment before work begins. Triggers: "pre-task check", "forecast difficulty", "how hard is this".
+description: Pre-flight risk assessment before work begins.
 ---
 
 # Pre-Task Forecast
