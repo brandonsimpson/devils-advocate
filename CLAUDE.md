@@ -18,8 +18,7 @@ The plugin follows the Claude Code plugin structure:
   - `critique-plan/` → `/devils-advocate:critique-plan <path>` — Plan document review
   - `second-opinion/` → `/devils-advocate:second-opinion` — Independent re-evaluation of prior critique
   - `log/` → `/devils-advocate:log` — Display session history
-- **`hooks/hooks.json`** — Registers a `Stop` hook that runs after each Claude response
-- **`hooks/scripts/post-task-reminder.sh`** — Shell script that reminds users to run critique when uncommitted changes exist
+- **`hooks/hooks.json`** — Registers a `Stop` hook with an inline command that reminds users to run critique when uncommitted changes exist
 
 ## Key Conventions
 
@@ -35,7 +34,7 @@ The plugin follows the Claude Code plugin structure:
 There is no build, lint, or test command. Changes are validated by:
 1. Reading the skill Markdown for correctness
 2. Installing the plugin locally and invoking the slash commands
-3. Checking that `hooks.json` is valid JSON and the hook script is executable
+3. Checking that `hooks.json` is valid JSON
 
 To test locally: install the plugin via `claude --plugin-dir .` from this directory, then invoke commands like `/devils-advocate:critique` in a project with code changes.
 
