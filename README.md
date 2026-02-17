@@ -51,7 +51,7 @@ claude --plugin-dir ~/.claude/plugins/devils-advocate
 
 ### `/devils-advocate:critique`
 
-Post-task adversarial critique. Scores the current solution across seven dimensions:
+Post-task adversarial critique. Scores the current solution across seven dimensions (plus a conditional eighth):
 
 - **Correctness** — Does it actually solve the problem?
 - **Completeness** — Missing edge cases or gaps?
@@ -60,8 +60,13 @@ Post-task adversarial critique. Scores the current solution across seven dimensi
 - **Security** — Injection vectors, auth/authz issues, secrets in code, OWASP top 10
 - **Testing** — Do tests exist? Do they pass? What code paths lack coverage?
 - **Architecture** — Separation of concerns, coupling, scalability, operational readiness
+- **Standards Compliance** *(conditional)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Only scored when standards files exist; omitted entirely otherwise. Distinguishes intentional vs accidental drift.
 
-Every score must cite specific code references (`file:line`) as evidence. Scores without evidence are not permitted. Outputs a 0-100 score, strengths, weaknesses, a "skeptical senior engineer" take, and an "Unverified" section listing what was NOT checked. If the score is below 80, proposes specific improvements and waits for your approval.
+Before scoring, the skill discovers project standards by reading `CLAUDE.md`/`AGENTS.md`, searching for ADR files, and grepping for existing patterns the code might be duplicating.
+
+Every score must cite specific code references (`file:line`) as evidence. Scores without evidence are not permitted. Scores are calibrated against explicit anchors (0-30 broken, 31-50 significant issues, 51-70 concerning, 71-85 solid, 86-95 very good, 96-100 virtually never). The overall score uses the formula `(average + lowest) / 2` so a single weak dimension drags down the result.
+
+Outputs strengths, weaknesses, a "skeptical senior engineer" take, standards drift details, duplicated patterns, and an "Unverified" section listing what was NOT checked. If the score is below 80, proposes specific improvements and waits for your approval.
 
 A context gate prevents critiques from running without sufficient context — if Claude hasn't read the code, it refuses to score rather than producing false confidence.
 
@@ -73,7 +78,7 @@ Pre-task forecast. Run this before starting work to evaluate:
 - **Feasibility** — Can an LLM do this well?
 - **Risk** — Where are errors most likely?
 
-Recommends whether to proceed, clarify first, or break into smaller tasks. Gates on whether the task description is detailed enough to forecast against.
+Checks for project standards (`CLAUDE.md`, `AGENTS.md`, ADRs) and weaves relevant conventions into the ambiguity and pitfall analysis. Lists relevant standards that apply to the upcoming task. Recommends whether to proceed, clarify first, or break into smaller tasks. Gates on whether the task description is detailed enough to forecast against.
 
 ### `/devils-advocate:critique-plan <path>`
 
@@ -83,15 +88,29 @@ Plan critique. Point it at a design doc or implementation plan:
 /devils-advocate:critique-plan docs/plans/my-plan.md
 ```
 
-Reviews completeness, feasibility, risk spots, gaps, overscoping, security, and architecture. Flags dependency ordering issues.
+Reviews completeness, feasibility, risk spots, gaps, overscoping, security, architecture, and standards compliance (conditional). Discovers project standards and ADRs to check whether the plan aligns with documented conventions. Flags dependency ordering issues and standards drift.
 
 ### `/devils-advocate:second-opinion`
 
-Re-critique with a different adversarial lens. Reads the most recent critique from the session log, independently re-scores the same work with a harsher persona ("assume the first critique was too lenient"), then produces a delta report showing where the two critiques agree, diverge, and what the first critique missed.
+Re-critique with a different adversarial lens. Reads the most recent critique from the session log, independently re-scores the same work with a harsher persona ("assume the first critique was too lenient"), then produces a delta report showing where the two critiques agree, diverge, and what the first critique missed. Discovers project standards and checks for existing patterns the code may be duplicating. If standards exist and the first critique didn't check them, that's flagged as a finding.
 
 ### `/devils-advocate:log`
 
 Displays the session history of all checks with total count, average score, trend direction, and git SHA linking each check to a specific commit.
+
+## Standards & ADR Awareness
+
+All scoring skills automatically discover your project's documented standards before evaluating:
+
+- **`CLAUDE.md` / `AGENTS.md`** — Read from the project root for conventions, required patterns, and constraints
+- **ADR files** — Searched in `docs/adr/`, `docs/decisions/`, `adr/`, `decisions/`, `doc/architecture/decisions/`, and `**/ADR-*.md`
+- **Existing patterns** — `critique` and `second-opinion` grep for utilities and helpers the critiqued code might be reinventing
+
+When standards are found, the three post-work skills (`critique`, `critique-plan`, `second-opinion`) add a **Standards Compliance** dimension. Evidence must cite both the standard source and the drifting code, and distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown).
+
+When no standards are found, the dimension is omitted entirely — no noise. If standards files exist but contain no actionable conventions (just a project description), they're treated as absent.
+
+Projects with 50+ commits and no ADRs get a gentle advisory suggesting they adopt architectural decision records.
 
 ## Session Log
 
