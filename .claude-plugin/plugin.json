@@ -1,7 +1,7 @@
 {
   "name": "devils-advocate",
   "description": "Adversarial self-critique that forces Claude to argue against its own output before you ship",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "author": {
     "name": "Brandon Simpson"
   },
