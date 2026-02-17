@@ -12,6 +12,7 @@ You are running an **adversarial self-critique** of your current work. You must 
 **Critique ONLY what was requested.** Do not assume features, methods, or functionality that were never part of the task or plan. Do not penalize the solution for lacking things that were never in scope. Exceptions:
 - **Testing** — always evaluate whether tests exist and pass for the code that was written
 - **Security** — always evaluate security concerns for the code that was written
+- **Standards Compliance** — always evaluate when project standards files exist (only scored when standards are found; omitted entirely otherwise)
 
 If the task was "add a login form" do NOT critique the absence of a password reset flow, OAuth integration, or rate limiting unless those were explicitly part of the requirements. Critiquing out-of-scope concerns creates noise and erodes trust in the tool.
 
@@ -40,11 +41,24 @@ Action required:
 
 Do NOT produce scores without context. A critique with insufficient context is worse than no critique — it creates false confidence.
 
-### Step 1: Identify the original task
+### Step 1: Discover project standards
+
+Search for documented standards, architectural decisions, and existing patterns:
+
+1. **Standards files** — Use Read to check for `CLAUDE.md` and `AGENTS.md` in the project root. Note any conventions, required patterns, or constraints they define.
+2. **ADR files** — Use Glob to search for architectural decision records: `docs/adr/*.md`, `docs/decisions/*.md`, `adr/*.md`, `decisions/*.md`, `doc/architecture/decisions/*.md`, `**/ADR-*.md`. Read any that exist.
+3. **Existing patterns** — Use Grep to search the codebase for utilities, helpers, or conventions similar to the code being critiqued. Look for patterns the work might be duplicating.
+4. **Project maturity check** — If no ADR files are found, run `git rev-list --count HEAD` to check the commit count. Projects with 50+ commits but no ADRs may benefit from an advisory.
+
+**Important:** If standards files exist but contain no actionable conventions or constraints (e.g., only a project description), treat it as if no standards were found — do not score Standards Compliance against a file with no actual standards.
+
+Record what you find — it feeds into the Standards Compliance dimension and the Existing Patterns output section.
+
+### Step 2: Identify the original task
 
 What was the user's original request or problem? State it clearly.
 
-### Step 2: Gather evidence
+### Step 3: Gather evidence
 
 Before scoring, collect concrete evidence:
 - Use Grep/Glob to search for test files related to the code under review
@@ -52,9 +66,17 @@ Before scoring, collect concrete evidence:
 - Use Grep to search for security-relevant patterns: hardcoded secrets, `eval()`, unsanitized input, SQL string concatenation, `innerHTML`, command injection vectors
 - Note specific file paths and line numbers for any issues found
 
-### Step 3: Evaluate against dimensions
+### Step 4: Evaluate against dimensions
 
 Score each 0-100. **Every score MUST cite specific code references (`file:line`) as evidence.** Scores without evidence are not permitted — "Fragility: 65" is invalid, "Fragility: 65 — no null check at `auth.ts:47`, no test covers empty input" is valid.
+
+Calibration anchors — use these to avoid compressing all scores into 70-85:
+- **0-30:** Fundamentally broken — does not work, critical security flaw, or completely wrong approach
+- **31-50:** Significant issues — partially works but has major gaps, missing error handling, or serious design flaws
+- **51-70:** Functional but concerning — works for the happy path but has notable weaknesses, missing tests, or fragile assumptions
+- **71-85:** Solid with minor issues — works correctly, reasonable design, but has room for improvement
+- **86-95:** Very good — well-tested, well-designed, handles edge cases, only minor nits
+- **96-100:** Virtually never awarded — reserved for trivially simple, comprehensively tested, flawless implementations
 
    - **Correctness** — Does the solution actually solve the stated problem? Are there logical errors, wrong assumptions, or incorrect outputs?
    - **Completeness** — Are there gaps, missing edge cases, or unhandled scenarios? Does it cover everything the user asked for?
@@ -63,17 +85,18 @@ Score each 0-100. **Every score MUST cite specific code references (`file:line`)
    - **Security** — Check for injection vectors (SQL, XSS, command), auth/authz issues, secrets/credentials in code, OWASP top 10 concerns. Use Grep to search for patterns like hardcoded secrets, unsanitized input, eval(), etc.
    - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written.
    - **Architecture** — Separation of concerns, coupling between modules, scalability implications, operational concerns (monitoring, rollback, deployment), API contract stability.
+   - **Standards Compliance** *(conditional — only score this if Step 1 found standards files or ADRs)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the drifting code (`file:line`). Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
    - **Overconfidence check** — What would a skeptical senior engineer say about this? What's the most likely criticism?
 
-### Step 4: Identify at least one weakness
+### Step 5: Identify at least one weakness
 
 Even if your confidence is high, you MUST identify at least one genuine concern, risk, or weakness. "No weaknesses" is never an acceptable answer.
 
-### Step 5: Calculate overall score
+### Step 6: Calculate overall score
 
-Weighted average of dimensions. The overall score should reflect the weakest dimension — a chain is only as strong as its weakest link. A score of 100 should be virtually impossible.
+Calculate the overall score as follows: take the average of all scored dimensions, then pull it toward the lowest-scoring dimension. Specifically: `overall = (average + lowest) / 2` (include Standards Compliance if it was scored). This ensures a single weak dimension drags down the overall score — a chain is only as strong as its weakest link — while still rewarding strength across other dimensions. A score of 100 should be virtually impossible.
 
-### Step 6: Write the session log entry
+### Step 7: Write the session log entry
 
 Use the Write tool to append to `.devils-advocate/session.md` in the project root. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA. Use this format:
 
@@ -103,8 +126,15 @@ Fragility:      XX/100 — [justification with file:line evidence]
 Security:       XX/100 — [justification with file:line evidence]
 Testing:        XX/100 — [justification with file:line evidence]
 Architecture:   XX/100 — [justification with file:line evidence]
+Standards:      XX/100 — [if standards files found; omit line entirely if not]
 
 Overall Score:  XX/100
+
+Standards Drift: [only if Standards was scored]
+• [standard] → [drifting code at file:line] — [intentional/accidental]
+
+Existing Patterns: [only if duplicated patterns found]
+• [pattern at file:line] — [how the current work duplicates it]
 
 Strengths:
 • [strength 1]
@@ -120,6 +150,10 @@ Unverified:
 • [what you did NOT verify — MANDATORY, at least one item]
 • [e.g., "I did not run the tests" / "I did not verify this compiles"]
 • [e.g., "I cannot check runtime behavior" / "I did not review files X, Y, Z"]
+
+Advisory: [only if no ADRs found in project with 50+ commits]
+This project has XX commits but no architectural decision records.
+Consider adopting ADRs to document key decisions.
 ```
 
 ## If Score < 80

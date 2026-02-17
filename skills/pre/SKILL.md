@@ -34,31 +34,43 @@ Do NOT produce scores without sufficient task detail. A forecast against a vague
 
 What is the user asking you to do? Be precise.
 
-### Step 2: Evaluate clarity
+### Step 2: Check for project standards
+
+Search for documented standards and architectural decisions that may be relevant to the upcoming task:
+
+1. **Standards files** — Use Read to check for `CLAUDE.md` and `AGENTS.md` in the project root. Note any conventions, required patterns, or constraints they define.
+2. **ADR files** — Use Glob to search for architectural decision records: `docs/adr/*.md`, `docs/decisions/*.md`, `adr/*.md`, `decisions/*.md`, `doc/architecture/decisions/*.md`, `**/ADR-*.md`. Read any that exist.
+3. **Project maturity check** — If no ADR files are found, run `git rev-list --count HEAD` to check the commit count. Projects with 50+ commits but no ADRs may benefit from an advisory.
+
+**Important:** If standards files exist but contain no actionable conventions or constraints (e.g., only a project description), treat it as if no standards were found.
+
+Record what you find — relevant standards feed into Ambiguities and Predicted Pitfalls evaluations. This step does NOT add a new scoring dimension; it informs the existing ones.
+
+### Step 3: Evaluate clarity
 
    - Is the task specific enough to act on?
    - What is ambiguous or underspecified?
    - What questions SHOULD be asked before starting?
 
-### Step 3: Evaluate feasibility
+### Step 4: Evaluate feasibility
 
    - Is this within your capabilities as an LLM?
    - What parts are you confident about?
    - What parts are risky or at the edge of your ability?
    - Does this require information you might not have?
 
-### Step 4: Predict pitfalls
+### Step 5: Predict pitfalls
 
    - Where are errors most likely to occur?
    - What assumptions will you need to make?
    - What are the most common mistakes for this type of task?
    - What would cause a complete failure vs. a partial success?
 
-### Step 5: Calculate confidence forecast
+### Step 6: Calculate confidence forecast
 
 Score 0-100. This is a PREDICTION, not a post-hoc evaluation. Be conservative. Weight feasibility and pitfall risk heavily.
 
-### Step 6: Write the session log entry
+### Step 7: Write the session log entry
 
 Use the Write tool to append to `.devils-advocate/session.md` in the project root. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
@@ -89,7 +101,19 @@ Predicted Pitfalls:
 • [where errors are most likely]
 • [assumptions that may be wrong]
 
+Relevant Standards: [only if standards files or ADRs were found]
+• [standard/ADR] — [how it applies to this task]
+
 Recommendation: [proceed / clarify first / break into smaller tasks]
+
+Unverified:
+• [what you did NOT verify — MANDATORY, at least one item]
+• [e.g., "I did not explore all relevant source files"]
+• [e.g., "I did not check if dependencies are compatible"]
+
+Advisory: [only if no ADRs found in project with 50+ commits]
+This project has XX commits but no architectural decision records.
+Consider adopting ADRs to document key decisions.
 ```
 
 ## Rules
@@ -99,3 +123,4 @@ Recommendation: [proceed / clarify first / break into smaller tasks]
 - If clarity is below 60, recommend the user clarify before proceeding
 - If feasibility is below 50, say so honestly and suggest alternatives
 - Never skip the session log write
+- The "Unverified" section is MANDATORY — must list at least one thing. If you claim you verified everything, you're lying.

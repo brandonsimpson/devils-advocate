@@ -12,6 +12,7 @@ You are running a **second opinion critique** — an independent re-evaluation o
 **Critique ONLY what was requested.** Do not assume features, methods, or functionality that were never part of the task or plan. Do not penalize the solution for lacking things that were never in scope. Exceptions:
 - **Testing** — always evaluate whether tests exist and pass for the code that was written
 - **Security** — always evaluate security concerns for the code that was written
+- **Standards Compliance** — always evaluate when project standards files exist (only scored when standards are found; omitted entirely otherwise)
 
 If the task was "add a login form" do NOT critique the absence of a password reset flow, OAuth integration, or rate limiting unless those were explicitly part of the requirements. Critiquing out-of-scope concerns creates noise and erodes trust in the tool.
 
@@ -25,35 +26,63 @@ Read `.devils-advocate/session.md` to find the most recent critique entry. Note 
 
 Read the original code/files that were critiqued. Use Grep/Glob to find related files if needed.
 
-### Step 3: Adopt a harsher adversarial persona
+### Step 3: Discover project standards
+
+Search for documented standards, architectural decisions, and existing patterns:
+
+1. **Standards files** — Use Read to check for `CLAUDE.md` and `AGENTS.md` in the project root. Note any conventions, required patterns, or constraints they define.
+2. **ADR files** — Use Glob to search for architectural decision records: `docs/adr/*.md`, `docs/decisions/*.md`, `adr/*.md`, `decisions/*.md`, `doc/architecture/decisions/*.md`, `**/ADR-*.md`. Read any that exist.
+3. **Existing patterns** — Use Grep to search the codebase for utilities, helpers, or conventions similar to the code being critiqued. Look for patterns the work might be duplicating.
+4. **Project maturity check** — If no ADR files are found, run `git rev-list --count HEAD` to check the commit count. Projects with 50+ commits but no ADRs may benefit from an advisory.
+
+**Important:** If standards files exist but contain no actionable conventions or constraints (e.g., only a project description), treat it as if no standards were found — do not score Standards Compliance against a file with no actual standards.
+
+Record what you find — it feeds into the Standards Compliance dimension and the Existing Patterns output section.
+
+### Step 4: Adopt a harsher adversarial persona
 
 Assume the first critique was too lenient. Your mandate:
 - Find what the first critique missed
 - Challenge assumptions the first critique accepted
 - Look for subtle issues: race conditions, edge cases, silent failures, security gaps
 - Check for things the first critique may have glossed over
+- If standards files or ADRs exist and the first critique didn't check standards compliance, that is a finding — flag it
 
-### Step 4: Score independently
+### Step 5: Score independently
 
-Score across the same dimensions — do NOT reference the first critique's scores while scoring. Every score MUST cite specific code references (`file:line`) as evidence:
+Score across the same dimensions — do NOT reference the first critique's scores while scoring. Every score MUST cite specific code references (`file:line`) as evidence. Use Grep/Glob to search for test files and run them with Bash. Use Grep to search for security-relevant patterns (hardcoded secrets, `eval()`, unsanitized input, SQL string concatenation, `innerHTML`, command injection vectors).
 
-   - **Correctness** — Does the solution actually solve the stated problem?
-   - **Completeness** — Are there gaps, missing edge cases, or unhandled scenarios?
-   - **Assumptions** — What was assumed that wasn't explicitly stated?
-   - **Fragility** — Would this break under reasonable variations?
-   - **Security** — Injection vectors, auth issues, secrets in code, OWASP top 10
-   - **Testing** — Do tests exist? Run them. Score 0 if no tests exist.
-   - **Architecture** — Separation of concerns, coupling, scalability, ops concerns
+Calibration anchors — use these to avoid compressing all scores into 70-85:
+- **0-30:** Fundamentally broken — does not work, critical security flaw, or completely wrong approach
+- **31-50:** Significant issues — partially works but has major gaps, missing error handling, or serious design flaws
+- **51-70:** Functional but concerning — works for the happy path but has notable weaknesses, missing tests, or fragile assumptions
+- **71-85:** Solid with minor issues — works correctly, reasonable design, but has room for improvement
+- **86-95:** Very good — well-tested, well-designed, handles edge cases, only minor nits
+- **96-100:** Virtually never awarded — reserved for trivially simple, comprehensively tested, flawless implementations
 
-### Step 5: Compare with first critique
+   - **Correctness** — Does the solution actually solve the stated problem? Are there logical errors, wrong assumptions, or incorrect outputs?
+   - **Completeness** — Are there gaps, missing edge cases, or unhandled scenarios? Does it cover everything the user asked for?
+   - **Assumptions** — What was assumed that wasn't explicitly stated? Are those assumptions valid? List each assumption.
+   - **Fragility** — Would this break under reasonable variations of the input or requirements? How brittle is it?
+   - **Security** — Check for injection vectors (SQL, XSS, command), auth/authz issues, secrets/credentials in code, OWASP top 10 concerns. Use Grep to search for patterns like hardcoded secrets, unsanitized input, eval(), etc.
+   - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written.
+   - **Architecture** — Separation of concerns, coupling between modules, scalability implications, operational concerns (monitoring, rollback, deployment), API contract stability.
+   - **Standards Compliance** *(conditional — only score this if Step 3 found standards files or ADRs)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the drifting code (`file:line`). Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
+
+### Step 6: Calculate overall score
+
+Calculate the overall score as follows: take the average of all scored dimensions, then pull it toward the lowest-scoring dimension. Specifically: `overall = (average + lowest) / 2` (include Standards Compliance if it was scored). You MUST identify at least one genuine concern, risk, or weakness. "No weaknesses" is never an acceptable answer.
+
+### Step 7: Compare with first critique
 
 After scoring independently, compare:
 - Where do scores diverge by more than 10 points? These are areas of uncertainty.
 - Where do both critiques agree? These findings are higher confidence.
 - What did the first critique miss that you found?
 - What did the first critique flag that holds up under re-examination?
+- If standards files exist: did the first critique check standards compliance? If not, note what it missed.
 
-### Step 6: Write the session log entry
+### Step 8: Write the session log entry
 
 Append to `.devils-advocate/session.md`. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
@@ -80,8 +109,15 @@ Fragility:      XX/100 — [justification with file:line evidence]
 Security:       XX/100 — [justification with file:line evidence]
 Testing:        XX/100 — [justification with file:line evidence]
 Architecture:   XX/100 — [justification with file:line evidence]
+Standards:      XX/100 — [if standards files found; omit line entirely if not]
 
 Overall Score:  XX/100
+
+Standards Drift: [only if Standards was scored]
+• [standard] → [drifting code at file:line] — [intentional/accidental]
+
+Existing Patterns: [only if duplicated patterns found]
+• [pattern at file:line] — [how the current work duplicates it]
 
 Comparison with First Critique:
 ───────────────────────────────────────
@@ -98,12 +134,33 @@ Divergence (uncertain areas):
 Missed by First Critique:
 • [issues found only in the second opinion]
 
+Standards Missed by First Critique: [only if standards exist and first critique didn't check them]
+• [standards compliance issues the first critique failed to evaluate]
+
 Verdict: [Does the first critique hold up? Was it too lenient, too harsh, or about right?]
 
 Unverified:
 • [what you did NOT verify — MANDATORY, at least one item]
 • [e.g., "I did not run the tests" / "I did not verify this compiles"]
+
+Advisory: [only if no ADRs found in project with 50+ commits]
+This project has XX commits but no architectural decision records.
+Consider adopting ADRs to document key decisions.
 ```
+
+## If Score < 80
+
+When the overall score is below 80, add a **Suggested Improvements** section:
+
+```
+Suggested Improvements:
+1. [specific, actionable improvement]
+2. [specific, actionable improvement]
+
+Would you like me to implement these improvements?
+```
+
+**IMPORTANT:** Do NOT implement improvements automatically. Present them and wait for user approval.
 
 ## Rules
 

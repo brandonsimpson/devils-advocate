@@ -12,6 +12,7 @@ You are running a **plan critique**. Read the specified plan file and scrutinize
 **Critique ONLY what was requested.** Do not assume features, methods, or functionality that were never part of the task or plan. Do not penalize the plan for lacking things that were never in scope. Exceptions:
 - **Testing** — always evaluate whether the plan includes a testing strategy for the work it describes
 - **Security** — always evaluate security concerns for the work the plan describes
+- **Standards Compliance** — always evaluate when project standards files exist (only scored when standards are found; omitted entirely otherwise)
 
 If the plan is for "add a login form" do NOT critique the absence of a password reset flow, OAuth integration, or rate limiting unless those were explicitly part of the requirements. Critiquing out-of-scope concerns creates noise and erodes trust in the tool.
 
@@ -43,7 +44,19 @@ Do NOT produce scores without context. A critique with insufficient context is w
 
 The user should provide a path as an argument (e.g., `/devils-advocate:critique-plan docs/plans/my-plan.md`). If no path is provided, ask for one. Use the Read tool to read the file.
 
-### Step 2: Evaluate against dimensions
+### Step 2: Discover project standards
+
+Search for documented standards and architectural decisions:
+
+1. **Standards files** — Use Read to check for `CLAUDE.md` and `AGENTS.md` in the project root. Note any conventions, required patterns, or constraints they define.
+2. **ADR files** — Use Glob to search for architectural decision records: `docs/adr/*.md`, `docs/decisions/*.md`, `adr/*.md`, `decisions/*.md`, `doc/architecture/decisions/*.md`, `**/ADR-*.md`. Read any that exist.
+3. **Project maturity check** — If no ADR files are found, run `git rev-list --count HEAD` to check the commit count. Projects with 50+ commits but no ADRs may benefit from an advisory.
+
+**Important:** If standards files exist but contain no actionable conventions or constraints (e.g., only a project description), treat it as if no standards were found — do not score Standards Compliance against a file with no actual standards.
+
+Record what you find — it feeds into the Standards Compliance dimension.
+
+### Step 3: Evaluate against dimensions
 
 Score each 0-100:
 
@@ -54,16 +67,17 @@ Score each 0-100:
    - **Overscoping** — Is the plan doing more than necessary? Are there YAGNI violations?
    - **Security** — Does the plan address authentication, authorization, input validation, secrets management? Plans that don't mention security for features that handle user input should score low.
    - **Architecture** — Does the plan respect separation of concerns? Are there coupling risks between components? Does it account for scalability, operational concerns (monitoring, rollback, deployment), and API contract stability? Plans that introduce tight coupling or ignore operational readiness should score low. Architecture mistakes in the plan phase are 10x more expensive to fix after implementation.
+   - **Standards Compliance** *(conditional — only score this if Step 2 found standards files or ADRs)* — Does the plan align with conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the conflicting plan section. Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
 
-### Step 3: Identify dependency issues
+### Step 4: Identify dependency issues
 
 Are steps ordered correctly? Does any step depend on something that comes later?
 
-### Step 4: Calculate overall score
+### Step 5: Calculate overall score
 
-Conservative weighted average. Plans with dependency ordering issues or missing steps should score below 70.
+Calculate the overall score as follows: take the average of all scored dimensions, then pull it toward the lowest-scoring dimension. Specifically: `overall = (average + lowest) / 2` (include Standards Compliance if it was scored). Plans with dependency ordering issues or missing steps should score below 70.
 
-### Step 5: Write the session log entry
+### Step 6: Write the session log entry
 
 Append to `.devils-advocate/session.md`. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
@@ -90,8 +104,12 @@ Gaps:          XX/100 — [what's missing?]
 Overscoping:   XX/100 — [doing too much?]
 Security:      XX/100 — [auth, input validation, secrets?]
 Architecture:  XX/100 — [separation of concerns, coupling, ops?]
+Standards:     XX/100 — [if standards files found; omit line entirely if not]
 
 Overall Score: XX/100
+
+Standards Drift: [only if Standards was scored]
+• [standard] → [conflicting plan section] — [intentional/accidental]
 
 Strengths:
 • [what the plan does well]
@@ -110,6 +128,10 @@ Unverified:
 • [what you did NOT verify — MANDATORY, at least one item]
 • [e.g., "I did not verify referenced files exist"]
 • [e.g., "I did not check if proposed APIs are compatible with existing code"]
+
+Advisory: [only if no ADRs found in project with 50+ commits]
+This project has XX commits but no architectural decision records.
+Consider adopting ADRs to document key decisions.
 ```
 
 ## Rules
