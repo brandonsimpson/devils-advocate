@@ -118,6 +118,8 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
 
    Increment the check number based on existing entries in the file.
 
+After writing the session log, run `touch .devils-advocate/.commit-approved` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
+
 ## Output Format
 
 Present your assessment to the user in this format:

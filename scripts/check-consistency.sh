@@ -129,6 +129,70 @@ for skill in critique critique-plan second-opinion; do
 done
 echo ""
 
+# 10. Overconfidence check in post-task critique skills
+echo "Overconfidence check"
+for skill in critique second-opinion; do
+  if grep -q "Overconfidence check" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has Overconfidence check"
+  else
+    fail "skills/$skill/SKILL.md missing Overconfidence check"
+  fi
+done
+echo ""
+
+# 11. Skeptical Take in post-task critique output formats
+echo "Skeptical Take"
+for skill in critique second-opinion; do
+  if grep -q "Skeptical Take" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has Skeptical Take"
+  else
+    fail "skills/$skill/SKILL.md missing Skeptical Take"
+  fi
+done
+echo ""
+
+# 12. Strengths section in post-task critique output formats
+echo "Strengths section"
+for skill in critique second-opinion; do
+  if grep -q "^Strengths:" "skills/$skill/SKILL.md" || grep -q "^• \[strength" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has Strengths section"
+  else
+    fail "skills/$skill/SKILL.md missing Strengths section"
+  fi
+done
+echo ""
+
+# 13. Directory creation instruction in session log write steps
+echo "Directory creation instruction"
+for skill in critique critique-plan second-opinion pre; do
+  if grep -q "Create the directory and file if they don't exist" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has directory creation instruction"
+  else
+    fail "skills/$skill/SKILL.md missing directory creation instruction"
+  fi
+done
+echo ""
+
+# 14. Calibration anchors in pre skill
+echo "Pre skill calibration"
+if grep -q "Calibration anchors" "skills/pre/SKILL.md"; then
+  pass "skills/pre/SKILL.md has calibration anchors"
+else
+  fail "skills/pre/SKILL.md missing calibration anchors"
+fi
+echo ""
+
+# 15. Existing patterns in critique and second-opinion
+echo "Existing patterns detection"
+for skill in critique second-opinion; do
+  if grep -qi "Existing patterns" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has existing patterns detection"
+  else
+    fail "skills/$skill/SKILL.md missing existing patterns detection"
+  fi
+done
+echo ""
+
 # Summary
 echo "═══════════════════════════════════════"
 printf "Results: \033[32m%d passed\033[0m" "$PASS"

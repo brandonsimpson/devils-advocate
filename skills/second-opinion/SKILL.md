@@ -93,6 +93,7 @@ Calibration anchors — use these to avoid compressing all scores into 70-85:
    - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written. For prompt-only or documentation-only projects with no executable code, evaluate whether structural validation exists (schema validation, linting, consistency checks) instead of traditional tests — score against whatever validation mechanism is appropriate for the project type.
    - **Architecture** — Separation of concerns, coupling between modules, scalability implications, operational concerns (monitoring, rollback, deployment), API contract stability.
    - **Standards Compliance** *(conditional — only score this if Step 3 found standards files or ADRs)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the drifting code (`file:line`). Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
+   - **Overconfidence check** — What would a skeptical senior engineer say about this? What's the most likely criticism?
 
 ### Step 6: Calculate overall score
 
@@ -109,7 +110,7 @@ After scoring independently, compare:
 
 ### Step 8: Write the session log entry
 
-Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
+Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
    ```markdown
    ## Check #N — Second opinion | YYYY-MM-DD HH:MM | <git-sha>
@@ -117,6 +118,8 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
    - **Delta from previous:** [+/- points]
    - **Summary:** [2-3 sentence assessment focusing on what the first critique missed]
    ```
+
+After writing the session log, run `touch .devils-advocate/.commit-approved` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
 
 ## Output Format
 
@@ -146,6 +149,12 @@ Existing Patterns: [only if duplicated patterns found in codebase]
 
 Reinvention Risk: [only if custom implementations of solved problems found]
 • [file:line] — [what is being hand-rolled] → [established solution that should be used instead]
+
+Strengths:
+• [strength 1]
+• [strength 2]
+
+Skeptical Take: [What a skeptical senior engineer would say]
 
 Comparison with First Critique:
 ───────────────────────────────────────

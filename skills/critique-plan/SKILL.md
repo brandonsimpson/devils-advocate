@@ -98,7 +98,7 @@ Calculate the overall score as follows: take the average of all scored dimension
 
 ### Step 7: Write the session log entry
 
-Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
+Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
    ```markdown
    ## Check #N — Plan critique | YYYY-MM-DD HH:MM | <git-sha>
@@ -107,6 +107,8 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
    - **Summary:** [2-3 sentence assessment]
    - **Suggestions:** [specific improvements if score < 80]
    ```
+
+After writing the session log, run `touch .devils-advocate/.commit-approved` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
 
 ## Output Format
 

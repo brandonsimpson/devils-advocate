@@ -18,7 +18,10 @@ The plugin follows the Claude Code plugin structure:
   - `critique-plan/` → `/devils-advocate:critique-plan <path>` — Plan document review
   - `second-opinion/` → `/devils-advocate:second-opinion` — Independent re-evaluation of prior critique
   - `log/` → `/devils-advocate:log` — Display session history
-- **`hooks/hooks.json`** — Registers a `Stop` hook with an inline command that reminds users to run critique when uncommitted changes exist
+- **`hooks/hooks.json`** — Registers two hooks:
+  - `PreToolUse` hook (Bash, key: `pre-commit-warning`) — prints a non-blocking warning on `git commit` if no `.devils-advocate/.commit-approved` marker exists, nudging the user to run critique first. The commit proceeds regardless. The marker is created by scoring skills after writing the session log and consumed (deleted) on the next commit, suppressing the warning when critique has already been performed.
+  - `PostToolUse` hook (Write, key: `plan-file-detect`) — detects when a plan file is written (matching paths with `plan`/`plans` in the name or directory) and suggests running `/devils-advocate:critique-plan`
+  - All hooks are **configurable** via `.devils-advocate/config.json` in the user's project. All hooks are on by default. To disable a hook, set its key to `false` under `hooks`: `{"hooks":{"pre-commit-warning":false}}`
 
 ## Key Conventions
 
@@ -36,9 +39,10 @@ The plugin follows the Claude Code plugin structure:
 ## Working in This Repo
 
 Changes are validated by:
-1. Running `bash scripts/check-consistency.sh` — automated checks for JSON validity, version sync, cross-skill consistency (calibration anchors, context gates, reinvention risk, unverified sections, scope-bounded critique, session log references), and frontmatter description lengths
-2. Reading the skill Markdown for correctness
-3. Installing the plugin locally and invoking the slash commands
+1. Running `bash scripts/check-consistency.sh` — automated checks for JSON validity, version sync, cross-skill consistency (calibration anchors, context gates, reinvention risk, unverified sections, scope-bounded critique, session log references, overconfidence check, skeptical take, strengths section, directory creation instructions, existing patterns detection), and frontmatter description lengths
+2. Running `bash scripts/test-plugin.sh` — deeper test suite covering plugin metadata, frontmatter validation, scoring formula consistency, session log format, output format dimension parity, hook validation, standards discovery, evidence requirements, context gate refusal format, CLAUDE.md accuracy, and score threshold documentation
+3. Reading the skill Markdown for correctness
+4. Installing the plugin locally and invoking the slash commands
 
 To test locally: install the plugin via `claude --plugin-dir .` from this directory, then invoke commands like `/devils-advocate:critique` in a project with code changes.
 

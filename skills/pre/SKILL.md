@@ -71,6 +71,14 @@ Record what you find — relevant standards feed into Ambiguities and Predicted 
 
 Score 0-100. This is a PREDICTION, not a post-hoc evaluation. Be conservative. Weight feasibility and pitfall risk heavily.
 
+Calibration anchors — use these to avoid compressing all scores into 70-85:
+- **0-30:** Near-certain failure — task is beyond LLM capabilities, critically underspecified, or requires information you definitely don't have
+- **31-50:** High risk — significant unknowns, task is at the edge of your ability, or multiple pitfalls are likely
+- **51-70:** Moderate risk — feasible but with notable uncertainties, some assumptions required, partial failure likely
+- **71-85:** Good chance of success — task is clear, within capabilities, with manageable risks
+- **86-95:** High confidence — straightforward task, well-understood domain, few unknowns
+- **96-100:** Virtually never awarded — reserved for trivially simple, completely unambiguous tasks
+
 ### Step 7: Write the session log entry
 
 Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:

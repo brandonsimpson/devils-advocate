@@ -1,11 +1,23 @@
 {
   "hooks": {
-    "Stop": [
+    "PreToolUse": [
       {
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "git status --porcelain 2>/dev/null | grep -q . && printf '\\n\\033[31mDevil'\"'\"'s Advocate: Uncommitted changes detected. Run /devils-advocate:critique to scrutinize this solution.\\033[0m\\n\\n' || true"
+            "command": "python3 -c \"import json,sys;c=json.load(open('.devils-advocate/config.json'));sys.exit(2) if not c.get('hooks',{}).get('pre-commit-warning',True) else None\" 2>/dev/null; [ $? -eq 2 ] || { CMD=$(python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null) || true; if echo \"$CMD\" | grep -qE 'git\\s+commit'; then if [ -f .devils-advocate/.commit-approved ]; then rm -f .devils-advocate/.commit-approved; else printf '\\n\\033[33mDevil'\"'\"'s Advocate: No critique found for uncommitted changes. Consider running /devils-advocate:critique before committing.\\033[0m\\n\\n' >&2; fi; fi; }; true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys;c=json.load(open('.devils-advocate/config.json'));sys.exit(2) if not c.get('hooks',{}).get('plan-file-detect',True) else None\" 2>/dev/null; [ $? -eq 2 ] || { FILE_PATH=$(python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))\" 2>/dev/null) && echo \"$FILE_PATH\" | grep -qiE '(plans?/|/plan[-_.]|[-_]plan\\.)' && printf '\\n\\033[33mDevil'\"'\"'s Advocate: Plan file written. Run /devils-advocate:critique-plan %s to review it.\\033[0m\\n\\n' \"$FILE_PATH\" || true; }; true"
           }
         ]
       }
