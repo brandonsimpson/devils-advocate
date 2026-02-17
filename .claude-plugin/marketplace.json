@@ -15,7 +15,7 @@
         "repo": "brandonsimpson/devils-advocate"
       },
       "description": "Adversarial self-critique that forces Claude to argue against its own output before you ship",
-      "version": "1.4.0"
+      "version": "1.4.1"
     }
   ]
 }
