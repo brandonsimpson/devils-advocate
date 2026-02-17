@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-task-reminder.sh"
+            "command": "git status --porcelain 2>/dev/null | grep -q . && printf '\\n\\033[31mDevil'\"'\"'s Advocate: Uncommitted changes detected. Run /devils-advocate:critique to scrutinize this solution.\\033[0m\\n\\n'"
           }
         ]
       }
