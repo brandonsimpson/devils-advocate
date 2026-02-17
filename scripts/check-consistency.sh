@@ -182,7 +182,18 @@ else
 fi
 echo ""
 
-# 15. Existing patterns in critique and second-opinion
+# 15. Weaknesses section in post-task critique output formats
+echo "Weaknesses section"
+for skill in critique second-opinion; do
+  if grep -q "^Weaknesses:" "skills/$skill/SKILL.md" || grep -q "^• \[weakness" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has Weaknesses section"
+  else
+    fail "skills/$skill/SKILL.md missing Weaknesses section"
+  fi
+done
+echo ""
+
+# 16. Existing patterns in critique and second-opinion
 echo "Existing patterns detection"
 for skill in critique second-opinion; do
   if grep -qi "Existing patterns" "skills/$skill/SKILL.md"; then

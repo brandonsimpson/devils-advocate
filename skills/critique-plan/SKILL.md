@@ -108,7 +108,7 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
    - **Suggestions:** [specific improvements if score < 80]
    ```
 
-After writing the session log, run `touch .devils-advocate/.commit-approved` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
+After writing the session log, run `touch .devils-advocate/.commit-reviewed` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
 
 ## Output Format
 

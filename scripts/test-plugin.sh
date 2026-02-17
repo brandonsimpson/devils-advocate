@@ -7,6 +7,12 @@
 
 set -euo pipefail
 
+# Clean up temp files on exit or interrupt
+cleanup() {
+  rm -f .devils-advocate/config.json .devils-advocate/.commit-reviewed
+}
+trap cleanup EXIT
+
 PASS=0
 FAIL=0
 
@@ -226,7 +232,34 @@ done
 echo ""
 
 # ---------------------------------------------------------------------------
-# 6. Hook validation
+# 6. Output section parity (critique vs second-opinion)
+# ---------------------------------------------------------------------------
+echo "Output section parity"
+
+# Sections that must appear in both critique and second-opinion output formats
+OUTPUT_SECTIONS="Strengths Weaknesses"
+for section in $OUTPUT_SECTIONS; do
+  for skill in critique second-opinion; do
+    if grep -q "^${section}:" "skills/$skill/SKILL.md"; then
+      pass "skills/$skill/SKILL.md output has $section section"
+    else
+      fail "skills/$skill/SKILL.md output missing $section section"
+    fi
+  done
+done
+
+# Skeptical Take in both
+for skill in critique second-opinion; do
+  if grep -q "^Skeptical Take:" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md output has Skeptical Take section"
+  else
+    fail "skills/$skill/SKILL.md output missing Skeptical Take section"
+  fi
+done
+echo ""
+
+# ---------------------------------------------------------------------------
+# 7. Hook validation
 # ---------------------------------------------------------------------------
 echo "Hook validation"
 
@@ -330,7 +363,7 @@ fi
 
 # PreToolUse hook: warns on git commit without marker (non-blocking)
 PRE_CMD=$(python3 -c "import json; print(json.load(open('hooks/hooks.json'))['hooks']['PreToolUse'][0]['hooks'][0]['command'])")
-rm -f .devils-advocate/.commit-approved
+rm -f .devils-advocate/.commit-reviewed
 
 PRE_WARN=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>/dev/null)
 PRE_STDERR=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1 >/dev/null)
@@ -349,11 +382,11 @@ fi
 
 # PreToolUse hook: silent when marker exists (critique already run)
 mkdir -p .devils-advocate
-touch .devils-advocate/.commit-approved
+touch .devils-advocate/.commit-reviewed
 PRE_QUIET_STDERR=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1 >/dev/null)
 PRE_QUIET_STDOUT=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>/dev/null)
 # Need to recreate marker since previous call consumed it
-touch .devils-advocate/.commit-approved
+touch .devils-advocate/.commit-reviewed
 PRE_ALL=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1)
 if ! echo "$PRE_ALL" | grep -q "No critique found"; then
   pass "PreToolUse hook silent when marker exists"
@@ -362,11 +395,11 @@ else
 fi
 
 # PreToolUse hook: removes marker after allowing commit
-if [ ! -f .devils-advocate/.commit-approved ]; then
+if [ ! -f .devils-advocate/.commit-reviewed ]; then
   pass "PreToolUse hook removes marker after allowing commit"
 else
   fail "PreToolUse hook did not remove marker after allowing commit"
-  rm -f .devils-advocate/.commit-approved
+  rm -f .devils-advocate/.commit-reviewed
 fi
 
 # PreToolUse hook: silent on non-commit commands
@@ -395,10 +428,10 @@ fi
 
 # Commit-approved marker instruction in scoring skills
 for skill in critique critique-plan second-opinion; do
-  if grep -q "commit-approved" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md creates commit-approved marker"
+  if grep -q "commit-reviewed" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md creates commit-reviewed marker"
   else
-    fail "skills/$skill/SKILL.md missing commit-approved marker instruction"
+    fail "skills/$skill/SKILL.md missing commit-reviewed marker instruction"
   fi
 done
 
@@ -439,7 +472,7 @@ else
   fail "PreToolUse hook disabled when key missing"
 fi
 
-rm -f .devils-advocate/config.json .devils-advocate/.commit-approved
+rm -f .devils-advocate/config.json .devils-advocate/.commit-reviewed
 echo ""
 
 # ---------------------------------------------------------------------------

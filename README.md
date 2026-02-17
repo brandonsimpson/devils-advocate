@@ -119,7 +119,7 @@ Even technically correct custom implementations get flagged — correctness toda
 
 Every check is logged to `.devils-advocate/session.md` with a git SHA, so you can correlate scores with specific commits. Add `.devils-advocate/` to your `.gitignore`.
 
-A stop hook automatically reminds you to run a critique whenever uncommitted changes exist.
+A pre-commit hook warns you to run a critique before `git commit` — the commit still proceeds, it's just a nudge. A plan-file hook suggests running `/devils-advocate:critique-plan` when you write a plan file. Both hooks are configurable via `.devils-advocate/config.json`.
 
 ## License
 

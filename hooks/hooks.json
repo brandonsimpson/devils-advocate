@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys;c=json.load(open('.devils-advocate/config.json'));sys.exit(2) if not c.get('hooks',{}).get('pre-commit-warning',True) else None\" 2>/dev/null; [ $? -eq 2 ] || { CMD=$(python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null) || true; if echo \"$CMD\" | grep -qE 'git\\s+commit'; then if [ -f .devils-advocate/.commit-approved ]; then rm -f .devils-advocate/.commit-approved; else printf '\\n\\033[33mDevil'\"'\"'s Advocate: No critique found for uncommitted changes. Consider running /devils-advocate:critique before committing.\\033[0m\\n\\n' >&2; fi; fi; }; true"
+            "command": "python3 -c \"import json,sys;c=json.load(open('.devils-advocate/config.json'));sys.exit(2) if not c.get('hooks',{}).get('pre-commit-warning',True) else None\" 2>/dev/null; [ $? -eq 2 ] || { CMD=$(python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null) || true; if echo \"$CMD\" | grep -qE 'git\\s+commit'; then if [ -f .devils-advocate/.commit-reviewed ]; then rm -f .devils-advocate/.commit-reviewed; else printf '\\n\\033[33mDevil'\"'\"'s Advocate: No critique found for uncommitted changes. Consider running /devils-advocate:critique before committing.\\033[0m\\n\\n' >&2; fi; fi; }; true"
           }
         ]
       }

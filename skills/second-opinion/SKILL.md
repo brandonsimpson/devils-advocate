@@ -119,7 +119,7 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
    - **Summary:** [2-3 sentence assessment focusing on what the first critique missed]
    ```
 
-After writing the session log, run `touch .devils-advocate/.commit-approved` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
+After writing the session log, run `touch .devils-advocate/.commit-reviewed` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
 
 ## Output Format
 
@@ -153,6 +153,10 @@ Reinvention Risk: [only if custom implementations of solved problems found]
 Strengths:
 • [strength 1]
 • [strength 2]
+
+Weaknesses:
+• [weakness 1 — REQUIRED, always at least one]
+• [weakness 2 if applicable]
 
 Skeptical Take: [What a skeptical senior engineer would say]
 
