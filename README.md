@@ -8,9 +8,13 @@ A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that adds
 
 ## Why
 
-LLMs confidently produce wrong answers. They never hesitate, never hedge, and present fabricated information with the same authority as accurate responses. This plugin was inspired by the ideas in [Confidently Wrong](https://brandon.cc/confidently-wrong) — it builds intentional friction and formalized skepticism directly into the AI-assisted development workflow.
+Claude is great at writing code. Claude is terrible at criticizing its own code. Left to its own devices, it'll tell you everything looks wonderful right up until production catches fire. Inspired by [Confidently Wrong](https://brandon.cc/confidently-wrong).
 
-This plugin forces Claude to argue against its own output, score its confidence, and surface concerns before you act on a response. A score of 100 is virtually impossible, and "no weaknesses found" is never accepted.
+A [devil's advocate](https://en.wikipedia.org/wiki/Devil%27s_advocate) argues against a position not because they believe the other side, but to find the holes everyone else missed. This plugin gives Claude that role — the skeptical colleague who reads your PR and says "yeah, but what about..." instead of "LGTM." It's the ultimate critic and feedback loop for your plans, features, and session progress.
+
+It'll catch you reinventing bcrypt, drifting from your own conventions, duplicating a helper that already exists three directories away, and writing plans where step 4 depends on step 7. Every score demands `file:line` evidence — no hand-waving, no vibes-based reviews. A perfect 100 is virtually impossible, and "no weaknesses found" is never an acceptable answer.
+
+It works at every stage: forecasting risk before you start, reviewing plans before you build, critiquing code after you write it, and offering a harsher second opinion when the first critique was too generous.
 
 ## Install
 
