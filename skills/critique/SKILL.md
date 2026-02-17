@@ -92,7 +92,7 @@ Calibration anchors — use these to avoid compressing all scores into 70-85:
    - **Assumptions** — What was assumed that wasn't explicitly stated? Are those assumptions valid? List each assumption.
    - **Fragility** — Would this break under reasonable variations of the input or requirements? How brittle is it?
    - **Security** — Check for injection vectors (SQL, XSS, command), auth/authz issues, secrets/credentials in code, OWASP top 10 concerns. Use Grep to search for patterns like hardcoded secrets, unsanitized input, eval(), etc.
-   - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written.
+   - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written. For prompt-only or documentation-only projects with no executable code, evaluate whether structural validation exists (schema validation, linting, consistency checks) instead of traditional tests — score against whatever validation mechanism is appropriate for the project type.
    - **Architecture** — Separation of concerns, coupling between modules, scalability implications, operational concerns (monitoring, rollback, deployment), API contract stability.
    - **Standards Compliance** *(conditional — only score this if Step 1 found standards files or ADRs)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the drifting code (`file:line`). Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
    - **Overconfidence check** — What would a skeptical senior engineer say about this? What's the most likely criticism?
@@ -107,7 +107,7 @@ Calculate the overall score as follows: take the average of all scored dimension
 
 ### Step 7: Write the session log entry
 
-Use the Write tool to append to `.devils-advocate/session.md` in the project root. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA. Use this format:
+Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA. Use this format:
 
    ```markdown
    ## Check #N — Post-task | YYYY-MM-DD HH:MM | <git-sha>

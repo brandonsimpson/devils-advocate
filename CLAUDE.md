@@ -29,16 +29,16 @@ The plugin follows the Claude Code plugin structure:
 - **Existing patterns detection** — The `critique` and `second-opinion` skills grep for existing utilities/helpers/conventions that the critiqued code might be duplicating within the codebase.
 - **Reinvention risk detection** — All four scoring skills check whether the work builds custom implementations of problems that have well-established, battle-tested solutions (e.g., hand-rolled crypto, custom auth, manual input sanitization). This is distinct from "existing patterns" which looks within the codebase — reinvention risk looks at the industry-wide landscape of solved problems.
 - **ADR advisory** — When no ADR files are found in a project with 50+ commits, skills display an advisory suggesting the project adopt architectural decision records.
-- **Context gates** — The `critique`, `pre`, and `critique-plan` skills have a Step 0 that refuses to produce scores if Claude lacks sufficient context. This prevents false-confidence scoring.
+- **Context gates** — All four scoring skills (`critique`, `pre`, `critique-plan`, `second-opinion`) have a Step 0 that refuses to produce scores if Claude lacks sufficient context. The `second-opinion` gate additionally verifies a prior critique exists in the session log. This prevents false-confidence scoring.
 - **Evidence requirement** — Critique scores must cite `file:line` references. Scores without evidence are invalid. Standards Compliance scores must cite both the standard source and the drifting code.
 - **Version syncing** — When bumping versions, update both `plugin.json` and `marketplace.json`.
 
 ## Working in This Repo
 
-There is no build, lint, or test command. Changes are validated by:
-1. Reading the skill Markdown for correctness
-2. Installing the plugin locally and invoking the slash commands
-3. Checking that `hooks.json` is valid JSON
+Changes are validated by:
+1. Running `bash scripts/check-consistency.sh` — automated checks for JSON validity, version sync, cross-skill consistency (calibration anchors, context gates, reinvention risk, unverified sections, scope-bounded critique, session log references), and frontmatter description lengths
+2. Reading the skill Markdown for correctness
+3. Installing the plugin locally and invoking the slash commands
 
 To test locally: install the plugin via `claude --plugin-dir .` from this directory, then invoke commands like `/devils-advocate:critique` in a project with code changes.
 

@@ -18,6 +18,28 @@ If the task was "add a login form" do NOT critique the absence of a password res
 
 ## Process
 
+### Step 0: Context Gate
+
+Before running a second opinion, verify you have sufficient context. Check:
+1. **Does a prior critique exist?** — Use Read to check `.devils-advocate/session.md`. If the file doesn't exist or has no entries, STOP — a second opinion requires a first opinion.
+2. **Have you read the relevant source files?** — If you haven't used Read/Grep to examine the actual code being critiqued, STOP.
+3. **Do you understand the original task?** — If the task was vague or you can't restate it precisely, STOP.
+
+If any check fails, output a **CONTEXT INSUFFICIENT** block instead of a critique:
+```
+CONTEXT INSUFFICIENT
+═══════════════════════════════════════
+Cannot provide a meaningful second opinion. Missing:
+• [what's missing — e.g., "No prior critique found in .devils-advocate/session.md"]
+• [what's needed — e.g., "Run /devils-advocate:critique first, then /devils-advocate:second-opinion"]
+
+Action required:
+1. [specific step the user should take]
+2. [specific step the user should take]
+```
+
+Do NOT produce scores without context. A second opinion with no first opinion is just a critique — use `/devils-advocate:critique` instead.
+
 ### Step 1: Read the previous critique
 
 Read `.devils-advocate/session.md` to find the most recent critique entry. Note the score but do NOT let it anchor your evaluation. You are scoring independently.
@@ -68,7 +90,7 @@ Calibration anchors — use these to avoid compressing all scores into 70-85:
    - **Assumptions** — What was assumed that wasn't explicitly stated? Are those assumptions valid? List each assumption.
    - **Fragility** — Would this break under reasonable variations of the input or requirements? How brittle is it?
    - **Security** — Check for injection vectors (SQL, XSS, command), auth/authz issues, secrets/credentials in code, OWASP top 10 concerns. Use Grep to search for patterns like hardcoded secrets, unsanitized input, eval(), etc.
-   - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written.
+   - **Testing** — Do tests exist? Run them if so. What code paths lack coverage? Are there integration tests? Score 0 if no tests exist for the code that was written. For prompt-only or documentation-only projects with no executable code, evaluate whether structural validation exists (schema validation, linting, consistency checks) instead of traditional tests — score against whatever validation mechanism is appropriate for the project type.
    - **Architecture** — Separation of concerns, coupling between modules, scalability implications, operational concerns (monitoring, rollback, deployment), API contract stability.
    - **Standards Compliance** *(conditional — only score this if Step 3 found standards files or ADRs)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the drifting code (`file:line`). Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
 
@@ -87,7 +109,7 @@ After scoring independently, compare:
 
 ### Step 8: Write the session log entry
 
-Append to `.devils-advocate/session.md`. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
+Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
    ```markdown
    ## Check #N — Second opinion | YYYY-MM-DD HH:MM | <git-sha>

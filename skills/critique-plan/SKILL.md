@@ -58,7 +58,15 @@ Record what you find — it feeds into the Standards Compliance dimension.
 
 ### Step 3: Evaluate against dimensions
 
-Score each 0-100:
+Score each 0-100. **Every score MUST cite specific plan sections or references as evidence.** Scores without evidence are not permitted.
+
+Calibration anchors — use these to avoid compressing all scores into 70-85:
+- **0-30:** Fundamentally broken — does not work, critical security flaw, or completely wrong approach
+- **31-50:** Significant issues — partially works but has major gaps, missing error handling, or serious design flaws
+- **51-70:** Functional but concerning — works for the happy path but has notable weaknesses, missing tests, or fragile assumptions
+- **71-85:** Solid with minor issues — works correctly, reasonable design, but has room for improvement
+- **86-95:** Very good — well-tested, well-designed, handles edge cases, only minor nits
+- **96-100:** Virtually never awarded — reserved for trivially simple, comprehensively tested, flawless implementations
 
    - **Completeness** — Does the plan cover all requirements it claims to? Are there missing steps or unaddressed concerns?
    - **Feasibility** — Are the steps realistic and in the right order? Are there missing dependencies between steps?
@@ -90,7 +98,7 @@ Calculate the overall score as follows: take the average of all scored dimension
 
 ### Step 7: Write the session log entry
 
-Append to `.devils-advocate/session.md`. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
+Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
    ```markdown
    ## Check #N — Plan critique | YYYY-MM-DD HH:MM | <git-sha>

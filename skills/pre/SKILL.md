@@ -73,7 +73,7 @@ Score 0-100. This is a PREDICTION, not a post-hoc evaluation. Be conservative. W
 
 ### Step 7: Write the session log entry
 
-Use the Write tool to append to `.devils-advocate/session.md` in the project root. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
+Read `.devils-advocate/session.md` first (if it exists), then use the Write tool to write the full existing contents plus your new entry appended at the end. Create the directory and file if they don't exist. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
    ```markdown
    ## Check #N — Pre-task | YYYY-MM-DD HH:MM | <git-sha>
