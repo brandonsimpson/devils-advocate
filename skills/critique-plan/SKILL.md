@@ -69,15 +69,26 @@ Score each 0-100:
    - **Architecture** — Does the plan respect separation of concerns? Are there coupling risks between components? Does it account for scalability, operational concerns (monitoring, rollback, deployment), and API contract stability? Plans that introduce tight coupling or ignore operational readiness should score low. Architecture mistakes in the plan phase are 10x more expensive to fix after implementation.
    - **Standards Compliance** *(conditional — only score this if Step 2 found standards files or ADRs)* — Does the plan align with conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Evidence must cite both the standard (e.g., `CLAUDE.md`, `ADR-003`) and the conflicting plan section. Distinguish between intentional drift (acknowledged deviation with rationale) and accidental drift (convention ignored or unknown). Omit this dimension entirely if no standards were found.
 
-### Step 4: Identify dependency issues
+### Step 4: Check for reinvention risk
+
+Evaluate whether the plan proposes building custom implementations of problems that have well-established, battle-tested solutions. This is especially critical in domains where getting it wrong has severe consequences:
+- **Cryptography** — custom hashing, encryption, token generation
+- **Authentication/authorization** — hand-rolled session management, JWT handling, OAuth flows, password storage
+- **Input sanitization** — custom escaping instead of parameterized queries or established libraries
+- **Date/time handling** — manual timezone math, custom date parsing
+- **Data validation** — hand-written schema validation instead of established validators
+
+If the plan describes building something from scratch in one of these domains without justifying why existing solutions are insufficient, flag it. "We need custom auth" requires strong justification; "we'll use Auth0/Passport/NextAuth" does not.
+
+### Step 5: Identify dependency issues
 
 Are steps ordered correctly? Does any step depend on something that comes later?
 
-### Step 5: Calculate overall score
+### Step 6: Calculate overall score
 
 Calculate the overall score as follows: take the average of all scored dimensions, then pull it toward the lowest-scoring dimension. Specifically: `overall = (average + lowest) / 2` (include Standards Compliance if it was scored). Plans with dependency ordering issues or missing steps should score below 70.
 
-### Step 6: Write the session log entry
+### Step 7: Write the session log entry
 
 Append to `.devils-advocate/session.md`. Before writing, use Bash to run `git rev-parse --short HEAD` to get the current commit SHA:
 
@@ -110,6 +121,9 @@ Overall Score: XX/100
 
 Standards Drift: [only if Standards was scored]
 • [standard] → [conflicting plan section] — [intentional/accidental]
+
+Reinvention Risk: [only if the plan proposes building solved problems from scratch]
+• [plan section] — [what is being hand-built] → [established solution that should be used instead]
 
 Strengths:
 • [what the plan does well]

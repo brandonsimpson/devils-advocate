@@ -65,6 +65,15 @@ Before scoring, collect concrete evidence:
 - If tests exist, run them with Bash and record the results
 - Use Grep to search for security-relevant patterns: hardcoded secrets, `eval()`, unsanitized input, SQL string concatenation, `innerHTML`, command injection vectors
 - Note specific file paths and line numbers for any issues found
+- **Reinvention check** — Evaluate whether the code builds a custom implementation of something that has well-established, battle-tested solutions. This is especially critical in domains where getting it wrong has severe consequences:
+  - **Cryptography** — custom hashing, encryption, token generation, random number generation
+  - **Authentication/authorization** — hand-rolled session management, JWT handling, OAuth flows, password storage
+  - **Input sanitization** — custom HTML/SQL escaping instead of parameterized queries or established sanitization libraries
+  - **Date/time handling** — manual timezone math, custom date parsing
+  - **HTTP clients** — custom retry/backoff logic, connection pooling
+  - **Data validation** — hand-written schema validation instead of established validators
+
+  Check `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, or equivalent for whether established libraries for the problem domain are already available or already in use elsewhere in the project. If the code reinvents a solved problem, flag it — even if the implementation is technically correct, because correctness today doesn't guarantee correctness against future edge cases that battle-tested libraries have already encountered.
 
 ### Step 4: Evaluate against dimensions
 
@@ -133,8 +142,11 @@ Overall Score:  XX/100
 Standards Drift: [only if Standards was scored]
 • [standard] → [drifting code at file:line] — [intentional/accidental]
 
-Existing Patterns: [only if duplicated patterns found]
+Existing Patterns: [only if duplicated patterns found in codebase]
 • [pattern at file:line] — [how the current work duplicates it]
+
+Reinvention Risk: [only if custom implementations of solved problems found]
+• [file:line] — [what is being hand-rolled] → [established solution that should be used instead]
 
 Strengths:
 • [strength 1]

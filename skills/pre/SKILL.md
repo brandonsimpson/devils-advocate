@@ -65,6 +65,7 @@ Record what you find — relevant standards feed into Ambiguities and Predicted 
    - What assumptions will you need to make?
    - What are the most common mistakes for this type of task?
    - What would cause a complete failure vs. a partial success?
+   - **Reinvention risk** — Does this task involve building something from scratch in a domain that has well-established, battle-tested solutions? Flag if the task proposes custom implementations of: cryptography, authentication/authorization, input sanitization, date/time handling, data validation, or other domains where hand-rolling is known to produce subtle, dangerous bugs. Suggest established alternatives.
 
 ### Step 6: Calculate confidence forecast
 
@@ -100,6 +101,9 @@ Ambiguities:
 Predicted Pitfalls:
 • [where errors are most likely]
 • [assumptions that may be wrong]
+
+Reinvention Risk: [only if the task involves building solved problems from scratch]
+• [what is being hand-built] → [established solution to consider instead]
 
 Relevant Standards: [only if standards files or ADRs were found]
 • [standard/ADR] — [how it applies to this task]

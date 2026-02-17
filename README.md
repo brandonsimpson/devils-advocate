@@ -62,7 +62,7 @@ Post-task adversarial critique. Scores the current solution across seven dimensi
 - **Architecture** — Separation of concerns, coupling, scalability, operational readiness
 - **Standards Compliance** *(conditional)* — Does the code follow conventions documented in `CLAUDE.md`, `AGENTS.md`, or ADRs? Only scored when standards files exist; omitted entirely otherwise. Distinguishes intentional vs accidental drift.
 
-Before scoring, the skill discovers project standards by reading `CLAUDE.md`/`AGENTS.md`, searching for ADR files, and grepping for existing patterns the code might be duplicating.
+Before scoring, the skill discovers project standards by reading `CLAUDE.md`/`AGENTS.md`, searching for ADR files, and grepping for existing patterns the code might be duplicating. It also checks whether the code hand-rolls solutions for problems that have well-established libraries (see [Reinvention Risk](#reinvention-risk) below).
 
 Every score must cite specific code references (`file:line`) as evidence. Scores without evidence are not permitted. Scores are calibrated against explicit anchors (0-30 broken, 31-50 significant issues, 51-70 concerning, 71-85 solid, 86-95 very good, 96-100 virtually never). The overall score uses the formula `(average + lowest) / 2` so a single weak dimension drags down the result.
 
@@ -111,6 +111,20 @@ When standards are found, the three post-work skills (`critique`, `critique-plan
 When no standards are found, the dimension is omitted entirely — no noise. If standards files exist but contain no actionable conventions (just a project description), they're treated as absent.
 
 Projects with 50+ commits and no ADRs get a gentle advisory suggesting they adopt architectural decision records.
+
+## Reinvention Risk
+
+All scoring skills check whether the work builds custom implementations of problems that have well-established, battle-tested solutions. People frequently spin out on difficult problems and build something unique without first checking if the problem has already been solved — especially in domains where getting it wrong has severe consequences:
+
+- **Cryptography** — custom hashing, encryption, token generation, random number generation
+- **Authentication/authorization** — hand-rolled session management, JWT handling, OAuth flows, password storage
+- **Input sanitization** — custom HTML/SQL escaping instead of parameterized queries or established sanitization libraries
+- **Date/time handling** — manual timezone math, custom date parsing
+- **Data validation** — hand-written schema validation instead of established validators
+
+When detected, the critique flags it with the specific code location and suggests the established solution that should be used instead. Even technically correct custom implementations get flagged — correctness today doesn't guarantee correctness against future edge cases that battle-tested libraries have already encountered.
+
+This is distinct from the "Existing Patterns" check, which looks for duplicated utilities *within* the codebase. Reinvention risk looks at the industry-wide landscape of solved problems.
 
 ## Session Log
 

@@ -47,10 +47,13 @@ Assume the first critique was too lenient. Your mandate:
 - Look for subtle issues: race conditions, edge cases, silent failures, security gaps
 - Check for things the first critique may have glossed over
 - If standards files or ADRs exist and the first critique didn't check standards compliance, that is a finding — flag it
+- If the code reinvents a solved problem (custom crypto, hand-rolled auth, manual sanitization) and the first critique didn't catch it, that is a finding — flag it
 
 ### Step 5: Score independently
 
 Score across the same dimensions — do NOT reference the first critique's scores while scoring. Every score MUST cite specific code references (`file:line`) as evidence. Use Grep/Glob to search for test files and run them with Bash. Use Grep to search for security-relevant patterns (hardcoded secrets, `eval()`, unsanitized input, SQL string concatenation, `innerHTML`, command injection vectors).
+
+**Reinvention check** — Evaluate whether the code builds a custom implementation of something that has well-established, battle-tested solutions. This is especially critical in domains where getting it wrong has severe consequences: cryptography (custom hashing, encryption, token generation), authentication/authorization (hand-rolled session management, JWT handling, OAuth, password storage), input sanitization (custom escaping instead of parameterized queries or established libraries), date/time handling, and data validation. Check dependency manifests for whether established libraries are already available. If the code reinvents a solved problem, flag it — even if technically correct, because correctness today doesn't guarantee correctness against future edge cases that battle-tested libraries have already encountered.
 
 Calibration anchors — use these to avoid compressing all scores into 70-85:
 - **0-30:** Fundamentally broken — does not work, critical security flaw, or completely wrong approach
@@ -116,8 +119,11 @@ Overall Score:  XX/100
 Standards Drift: [only if Standards was scored]
 • [standard] → [drifting code at file:line] — [intentional/accidental]
 
-Existing Patterns: [only if duplicated patterns found]
+Existing Patterns: [only if duplicated patterns found in codebase]
 • [pattern at file:line] — [how the current work duplicates it]
+
+Reinvention Risk: [only if custom implementations of solved problems found]
+• [file:line] — [what is being hand-rolled] → [established solution that should be used instead]
 
 Comparison with First Critique:
 ───────────────────────────────────────
