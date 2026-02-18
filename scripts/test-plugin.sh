@@ -307,13 +307,13 @@ else
   fail "PostToolUse hook missing Write matcher"
 fi
 
-# All hook commands have safe fallback (|| true)
-HOOK_COUNT=$(grep -c "|| true" "hooks/hooks.json")
+# All hook commands use node (not python3 or bash)
+NODE_COUNT=$(grep -c '"command": "node -e' "hooks/hooks.json")
 COMMAND_COUNT=$(grep -c '"command":' "hooks/hooks.json")
-if [ "$HOOK_COUNT" -eq "$COMMAND_COUNT" ]; then
-  pass "all hook commands have safe fallback (|| true) ($HOOK_COUNT/$COMMAND_COUNT)"
+if [ "$NODE_COUNT" -eq "$COMMAND_COUNT" ]; then
+  pass "all hook commands use node ($NODE_COUNT/$COMMAND_COUNT)"
 else
-  fail "not all hook commands have safe fallback ($HOOK_COUNT/$COMMAND_COUNT)"
+  fail "not all hook commands use node ($NODE_COUNT/$COMMAND_COUNT)"
 fi
 
 # Hook commands reference the plugin name
@@ -470,6 +470,25 @@ if echo "$PRE_MISSING_KEY" | grep -q "No critique found"; then
   pass "PreToolUse hook defaults to enabled when key missing"
 else
   fail "PreToolUse hook disabled when key missing"
+fi
+
+rm -f .devils-advocate/config.json .devils-advocate/.commit-reviewed
+
+# Hook config: hooks degrade gracefully on malformed config.json
+echo 'NOT VALID JSON{{{' > .devils-advocate/config.json
+
+PRE_MALFORMED=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1)
+if echo "$PRE_MALFORMED" | grep -q "No critique found"; then
+  pass "PreToolUse hook degrades gracefully on malformed config.json"
+else
+  fail "PreToolUse hook crashes on malformed config.json"
+fi
+
+POST_MALFORMED=$(echo '{"tool_input":{"file_path":"/tmp/plans/test.md"}}' | eval "$POST_CMD" 2>&1)
+if echo "$POST_MALFORMED" | grep -q "critique-plan"; then
+  pass "PostToolUse hook degrades gracefully on malformed config.json"
+else
+  fail "PostToolUse hook crashes on malformed config.json"
 fi
 
 rm -f .devils-advocate/config.json .devils-advocate/.commit-reviewed

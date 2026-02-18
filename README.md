@@ -46,6 +46,16 @@ Or single session: `claude --plugin-dir ~/.claude/plugins/devils-advocate`
 
 ## Commands
 
+You can use the full slash command or just ask naturally — Claude will recognize the intent:
+
+| Slash command | Natural language |
+|---|---|
+| `/devils-advocate:critique` | "critique" |
+| `/devils-advocate:pre` | "pre-flight check" |
+| `/devils-advocate:critique-plan <path>` | "critique plan docs/plan.md" |
+| `/devils-advocate:second-opinion` | "second opinion" |
+| `/devils-advocate:log` | "show critique log" |
+
 ### `/devils-advocate:critique`
 
 Post-task adversarial critique. Scores the current solution across seven dimensions (plus a conditional eighth):

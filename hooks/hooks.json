@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys;c=json.load(open('.devils-advocate/config.json'));sys.exit(2) if not c.get('hooks',{}).get('pre-commit-warning',True) else None\" 2>/dev/null; [ $? -eq 2 ] || { CMD=$(python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('command',''))\" 2>/dev/null) || true; if echo \"$CMD\" | grep -qE 'git\\s+commit'; then if [ -f .devils-advocate/.commit-reviewed ]; then rm -f .devils-advocate/.commit-reviewed; else printf '\\n\\033[33mDevil'\"'\"'s Advocate: No critique found for uncommitted changes. Consider running /devils-advocate:critique before committing.\\033[0m\\n\\n' >&2; fi; fi; }; true"
+            "command": "node -e \"const fs=require('fs');try{const c=JSON.parse(fs.readFileSync('.devils-advocate/config.json','utf8'));if(c.hooks&&c.hooks['pre-commit-warning']===false)process.exit(0)}catch(e){}let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const cmd=JSON.parse(d).tool_input.command||'';if(/git\\s+commit/.test(cmd)){if(fs.existsSync('.devils-advocate/.commit-reviewed')){fs.unlinkSync('.devils-advocate/.commit-reviewed')}else{process.stderr.write('\\n\\x1b[33mDevil\\'s Advocate: No critique found for uncommitted changes. Consider running /devils-advocate:critique before committing.\\x1b[0m\\n\\n')}}}catch(e){}})\""
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys;c=json.load(open('.devils-advocate/config.json'));sys.exit(2) if not c.get('hooks',{}).get('plan-file-detect',True) else None\" 2>/dev/null; [ $? -eq 2 ] || { FILE_PATH=$(python3 -c \"import sys,json;print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))\" 2>/dev/null) && echo \"$FILE_PATH\" | grep -qiE '(plans?/|/plan[-_.]|[-_]plan\\.)' && printf '\\n\\033[33mDevil'\"'\"'s Advocate: Plan file written. Run /devils-advocate:critique-plan %s to review it.\\033[0m\\n\\n' \"$FILE_PATH\" || true; }; true"
+            "command": "node -e \"const fs=require('fs');try{const c=JSON.parse(fs.readFileSync('.devils-advocate/config.json','utf8'));if(c.hooks&&c.hooks['plan-file-detect']===false)process.exit(0)}catch(e){}let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const fp=JSON.parse(d).tool_input.file_path||'';if(/plans?\\/|\\/plan[-_.]|[-_]plan\\./i.test(fp)){process.stderr.write('\\n\\x1b[33mDevil\\'s Advocate: Plan file written. Run /devils-advocate:critique-plan '+fp+' to review it.\\x1b[0m\\n\\n')}}catch(e){}})\""
           }
         ]
       }

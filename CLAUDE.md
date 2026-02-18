@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Claude Code plugin** that adds adversarial self-critique capabilities. It's a prompt-only plugin — no build step, no dependencies, no compiled code. The entire plugin is Markdown skill files and a shell hook.
+This is a **Claude Code plugin** that adds adversarial self-critique capabilities. It's a prompt-only plugin — no build step, no dependencies, no compiled code. The entire plugin is Markdown skill files and Node.js hooks.
 
 ## Architecture
 
@@ -18,6 +18,7 @@ The plugin follows the Claude Code plugin structure:
   - `critique-plan/` → `/devils-advocate:critique-plan <path>` — Plan document review
   - `second-opinion/` → `/devils-advocate:second-opinion` — Independent re-evaluation of prior critique
   - `log/` → `/devils-advocate:log` — Display session history
+- **`hooks/HOOKS.md`** — Companion documentation explaining the inline hook logic step-by-step (hooks are `node -e` one-liners due to plugin path constraints).
 - **`hooks/hooks.json`** — Registers two hooks:
   - `PreToolUse` hook (Bash, key: `pre-commit-warning`) — prints a non-blocking warning on `git commit` if no `.devils-advocate/.commit-reviewed` marker exists, nudging the user to run critique first. The commit proceeds regardless. The marker is created by scoring skills after writing the session log and consumed (deleted) on the next commit, suppressing the warning when critique has already been performed.
   - `PostToolUse` hook (Write, key: `plan-file-detect`) — detects when a plan file is written (matching paths with `plan`/`plans` in the name or directory) and suggests running `/devils-advocate:critique-plan`
