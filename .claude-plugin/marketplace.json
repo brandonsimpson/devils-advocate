@@ -11,11 +11,11 @@
     {
       "name": "devils-advocate",
       "source": {
-        "source": "url",
-        "url": "https://github.com/brandonsimpson/devils-advocate.git"
+        "source": "github",
+        "repo": "brandonsimpson/devils-advocate"
       },
       "description": "Forces Claude to critique its own work before you ship it",
-      "version": "1.5.3"
+      "version": "1.5.4"
     }
   ]
 }

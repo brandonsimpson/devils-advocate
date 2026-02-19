@@ -1,7 +1,7 @@
 {
   "name": "devils-advocate",
   "description": "Forces Claude to critique its own work before you ship it",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "author": {
     "name": "Brandon Simpson"
   },
