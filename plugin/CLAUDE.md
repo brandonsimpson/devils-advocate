@@ -10,8 +10,8 @@ This is a **Claude Code plugin** that adds adversarial self-critique capabilitie
 
 The plugin follows the Claude Code plugin structure:
 
-- **`.claude-plugin/plugin.json`** — Plugin metadata (name, version, description). Version here is the source of truth.
-- **`.claude-plugin/marketplace.json`** — Marketplace registry entry for `brandonsimpson/devils-advocate`. Version must stay in sync with `plugin.json`.
+- **`plugin/.claude-plugin/plugin.json`** — Plugin metadata (name, version, description). Version here is the source of truth.
+- **`.claude-plugin/marketplace.json`** — Marketplace registry entry (lives at repo root, not inside `plugin/`). Source points to `./plugin`. Version must stay in sync with `plugin.json`.
 - **`skills/`** — Each subdirectory contains a `SKILL.md` file that defines a slash command:
   - `critique/` → `/devils-advocate:critique` — Post-task adversarial scoring across 7 dimensions (+ conditional Standards Compliance)
   - `pre/` → `/devils-advocate:pre` — Pre-task feasibility forecast
@@ -40,12 +40,12 @@ The plugin follows the Claude Code plugin structure:
 ## Working in This Repo
 
 Changes are validated by:
-1. Running `bash scripts/check-consistency.sh` — automated checks for JSON validity, version sync, cross-skill consistency (calibration anchors, context gates, reinvention risk, unverified sections, scope-bounded critique, session log references, overconfidence check, skeptical take, strengths section, weaknesses section, directory creation instructions, existing patterns detection), and frontmatter description lengths
-2. Running `bash scripts/test-plugin.sh` — deeper test suite covering plugin metadata, frontmatter validation, scoring formula consistency, session log format, output format dimension parity, output section parity, hook validation, standards discovery, evidence requirements, context gate refusal format, CLAUDE.md accuracy, and score threshold documentation
+1. Running `bash plugin/scripts/check-consistency.sh` — automated checks for JSON validity, version sync, cross-skill consistency (calibration anchors, context gates, reinvention risk, unverified sections, scope-bounded critique, session log references, overconfidence check, skeptical take, strengths section, weaknesses section, directory creation instructions, existing patterns detection), and frontmatter description lengths
+2. Running `bash plugin/scripts/test-plugin.sh` — deeper test suite covering plugin metadata, frontmatter validation, scoring formula consistency, session log format, output format dimension parity, output section parity, hook validation, standards discovery, evidence requirements, context gate refusal format, CLAUDE.md accuracy, and score threshold documentation
 3. Reading the skill Markdown for correctness
 4. Installing the plugin locally and invoking the slash commands
 
-To test locally: install the plugin via `claude --plugin-dir .` from this directory, then invoke commands like `/devils-advocate:critique` in a project with code changes.
+To test locally: install the plugin via `claude --plugin-dir ./plugin` from the repo root, then invoke commands like `/devils-advocate:critique` in a project with code changes.
 
 ## Historical Context
 

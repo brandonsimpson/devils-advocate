@@ -10,12 +10,9 @@
   "plugins": [
     {
       "name": "devils-advocate",
-      "source": {
-        "source": "github",
-        "repo": "brandonsimpson/devils-advocate"
-      },
+      "source": "./plugin",
       "description": "Forces Claude to critique its own work before you ship it",
-      "version": "1.5.4"
+      "version": "2.0.0"
     }
   ]
 }

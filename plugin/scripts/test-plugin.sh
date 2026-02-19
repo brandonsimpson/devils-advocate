@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # Test suite for the devils-advocate plugin.
-# Run from the repo root: bash scripts/test-plugin.sh
+# Run from the repo root: bash plugin/scripts/test-plugin.sh
 #
 # Tests go beyond check-consistency.sh by validating semantic content,
 # output format templates, scoring formulas, and structural invariants.
 
 set -euo pipefail
+
+# Scripts run from repo root but plugin files are in plugin/
+cd "$(dirname "$0")/.."
 
 # Clean up temp files on exit or interrupt
 cleanup() {
@@ -40,7 +43,7 @@ done
 # marketplace.json has required structure
 if python3 -c "
 import json
-d = json.load(open('.claude-plugin/marketplace.json'))
+d = json.load(open('../.claude-plugin/marketplace.json'))
 assert 'plugins' in d and len(d['plugins']) > 0
 assert 'source' in d['plugins'][0]
 " 2>/dev/null; then
@@ -53,7 +56,7 @@ fi
 if python3 -c "
 import json
 p = json.load(open('.claude-plugin/plugin.json'))['name']
-m = json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['name']
+m = json.load(open('../.claude-plugin/marketplace.json'))['plugins'][0]['name']
 assert p == m, f'{p} != {m}'
 " 2>/dev/null; then
   pass "plugin name matches across plugin.json and marketplace.json"
@@ -577,7 +580,7 @@ else
 fi
 
 # banner.png referenced in README exists
-if [ -f "banner.png" ]; then
+if [ -f "../banner.png" ]; then
   pass "banner.png exists (referenced in README.md)"
 else
   fail "banner.png missing (referenced in README.md)"

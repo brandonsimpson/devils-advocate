@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Consistency checks for the devils-advocate plugin.
-# Run from the repo root: bash scripts/check-consistency.sh
+# Run from the repo root: bash plugin/scripts/check-consistency.sh
 
 set -euo pipefail
+
+# Scripts run from repo root but plugin files are in plugin/
+cd "$(dirname "$0")/.."
 
 PASS=0
 FAIL=0
@@ -30,7 +33,7 @@ else
   fail ".claude-plugin/plugin.json is invalid JSON"
 fi
 
-if python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))" 2>/dev/null; then
+if python3 -c "import json; json.load(open('../.claude-plugin/marketplace.json'))" 2>/dev/null; then
   pass ".claude-plugin/marketplace.json is valid JSON"
 else
   fail ".claude-plugin/marketplace.json is invalid JSON"
@@ -40,7 +43,7 @@ echo ""
 # 2. Version sync between plugin.json and marketplace.json
 echo "Version sync"
 PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
-MARKETPLACE_VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+MARKETPLACE_VERSION=$(python3 -c "import json; print(json.load(open('../.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
 if [ "$PLUGIN_VERSION" = "$MARKETPLACE_VERSION" ]; then
   pass "plugin.json ($PLUGIN_VERSION) matches marketplace.json ($MARKETPLACE_VERSION)"
 else
