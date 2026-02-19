@@ -1,7 +1,7 @@
 {
   "name": "devils-advocate",
   "metadata": {
-    "description": "Forces Claude to critique its own work — scores code across 7 dimensions, flags risks before you start, and reviews plans before you build"
+    "description": "Forces Claude to critique its own work before you ship it"
   },
   "owner": {
     "name": "Brandon Simpson",
@@ -14,8 +14,8 @@
         "source": "url",
         "url": "https://github.com/brandonsimpson/devils-advocate.git"
       },
-      "description": "Forces Claude to critique its own work — scores code across 7 dimensions, flags risks before you start, and reviews plans before you build",
-      "version": "1.5.2"
+      "description": "Forces Claude to critique its own work before you ship it",
+      "version": "1.5.3"
     }
   ]
 }
