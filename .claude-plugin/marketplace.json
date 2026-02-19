@@ -10,9 +10,12 @@
   "plugins": [
     {
       "name": "devils-advocate",
-      "source": ".",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/brandonsimpson/devils-advocate.git"
+      },
       "description": "Forces Claude to critique its own work — scores code across 7 dimensions, flags risks before you start, and reviews plans before you build",
-      "version": "1.5.1"
+      "version": "1.5.2"
     }
   ]
 }
