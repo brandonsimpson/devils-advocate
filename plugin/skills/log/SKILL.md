@@ -24,6 +24,8 @@ Display the confidence assessment history for this session.
    - Lowest-scoring check (the one that needs most attention)
    - Note: Each entry includes a git SHA linking the check to a specific commit
 
+4. **List individual log files** — Use Glob to check for files in `.devils-advocate/logs/*.md`. If any exist, list their filenames so the user knows which detailed critiques are available to read.
+
 ## Output Format
 
 ```
@@ -35,6 +37,10 @@ SESSION LOG
 ───────────────────────────────────────
 Summary: N checks | Avg: XX/100 | Trend: [improving/declining/stable]
 Lowest:  Check #X (XX/100) @ <sha> — [brief note]
+
+Detailed Logs: [only if .devils-advocate/logs/ has files]
+• [filename1]
+• [filename2]
 ```
 
 ## Rules

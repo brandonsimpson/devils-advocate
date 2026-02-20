@@ -89,6 +89,8 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
    - **Summary:** [2-3 sentence forecast of difficulty and risks]
    ```
 
+After writing the session log entry, also write the full formatted forecast output (everything from the Output Format section) to `.devils-advocate/logs/check-{N}-pre-task-{YYYY-MM-DD}-{HHMM}.md` using the same check number and timestamp. Create the `logs/` directory if it doesn't exist.
+
 ## Output Format
 
 ```

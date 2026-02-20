@@ -118,7 +118,9 @@ Read `.devils-advocate/session.md` first (if it exists), then use the Write tool
 
    Increment the check number based on existing entries in the file.
 
-After writing the session log, run `touch .devils-advocate/.commit-reviewed` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
+After writing the session log entry, also write the full formatted critique output (everything from the Output Format section) to `.devils-advocate/logs/check-{N}-critique-{YYYY-MM-DD}-{HHMM}.md` using the same check number and timestamp. Create the `logs/` directory if it doesn't exist.
+
+After writing both log files, run `touch .devils-advocate/.commit-reviewed` to signal that a critique has been performed. This allows the pre-commit hook to permit the next `git commit`.
 
 ## Output Format
 

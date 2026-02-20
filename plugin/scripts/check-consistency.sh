@@ -207,6 +207,17 @@ for skill in critique second-opinion; do
 done
 echo ""
 
+# 17. Individual log file instruction in scoring skills
+echo "Individual log files"
+for skill in critique critique-plan second-opinion pre; do
+  if grep -q "devils-advocate/logs/check-" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has individual log file instruction"
+  else
+    fail "skills/$skill/SKILL.md missing individual log file instruction"
+  fi
+done
+echo ""
+
 # Summary
 echo "═══════════════════════════════════════"
 printf "Results: \033[32m%d passed\033[0m" "$PASS"
