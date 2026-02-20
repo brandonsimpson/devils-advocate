@@ -1,7 +1,7 @@
 {
   "name": "devils-advocate",
-  "description": "Forces Claude to critique its own work before you ship it",
-  "version": "2.1.0",
+  "description": "Claude's harshest critic. Evidence required. Perfection impossible.",
+  "version": "2.2.0",
   "author": {
     "name": "Brandon Simpson"
   },

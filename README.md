@@ -4,15 +4,19 @@
 
 # devils-advocate
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that forces Claude to argue against its own output before you ship it.
+Claude's harshest critic. A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that scores Claude's work like a skeptical senior engineer — the one who's never impressed, always finds something, and demands receipts for every claim.
 
 ## Why
 
-Claude is great at writing code. Claude is terrible at criticizing its own code. Left to its own devices, it'll tell you everything looks wonderful right up until production catches fire. Inspired by [Confidently Wrong](https://brandon.cc/confidently-wrong).
+Claude writes code confidently. Too confidently. Left unchecked, it'll tell you everything looks wonderful right up until production catches fire. Inspired by [Confidently Wrong](https://brandon.cc/confidently-wrong).
 
-A [devil's advocate](https://en.wikipedia.org/wiki/Devil%27s_advocate) argues against a position not because they believe the other side, but to find the holes everyone else missed. This plugin gives Claude that role — the skeptical colleague who says "yeah, but what about..." instead of "LGTM." It's the ultimate critic and feedback loop for your plans, features, and session progress.
+A [devil's advocate](https://en.wikipedia.org/wiki/Devil%27s_advocate) argues against a position not because they believe the other side, but to surface the holes everyone else missed. This plugin gives Claude that role — the skeptical colleague who says "yeah, but what about..." instead of "LGTM."
 
-It'll catch you reinventing bcrypt, drifting from your own conventions, duplicating a helper that already exists three directories away, and writing plans where step 4 depends on step 7. Every score demands `file:line` evidence — no hand-waving, no vibes-based reviews. A perfect 100 is virtually impossible, and "no weaknesses found" is never an acceptable answer.
+A perfect 100 is virtually impossible. "No weaknesses found" is never an acceptable answer. Every score demands `file:line` evidence — no hand-waving, no vibes-based reviews.
+
+## What it catches
+
+It'll flag you for reinventing bcrypt, drifting from your own documented conventions, duplicating a helper that already exists three directories away, and writing plans where step 4 depends on step 7. It knows when you're hand-rolling auth instead of using a battle-tested library, and it won't let you forget that "works on my machine" isn't a testing strategy.
 
 It works at every stage: forecasting risk before you start, reviewing plans before you build, critiquing code after you write it, and offering a harsher second opinion when the first critique was too generous.
 
@@ -46,7 +50,7 @@ Or single session: `claude --plugin-dir ~/.claude/plugins/devils-advocate`
 
 ## Commands
 
-You can use the full slash command or just ask naturally — Claude will recognize the intent:
+Use the full slash command or just ask naturally — Claude will recognize the intent:
 
 | Slash command | Natural language |
 |---|---|
@@ -58,78 +62,80 @@ You can use the full slash command or just ask naturally — Claude will recogni
 
 ### `/devils-advocate:critique`
 
-Post-task adversarial critique. Scores the current solution across seven dimensions (plus a conditional eighth):
+The main event. Post-task adversarial scoring across seven dimensions (plus a conditional eighth). No dimension gets a free pass:
 
-- **Correctness** — Does it actually solve the problem?
-- **Completeness** — Missing edge cases or gaps?
-- **Assumptions** — What was assumed that wasn't stated?
-- **Fragility** — Would it break under reasonable input variations?
-- **Security** — Injection vectors, auth/authz issues, secrets in code, OWASP top 10
-- **Testing** — Do tests exist? Do they pass? What code paths lack coverage?
-- **Architecture** — Separation of concerns, coupling, scalability, operational readiness
-- **Standards Compliance** *(conditional)* — Does the code follow your documented conventions in `CLAUDE.md`, `AGENTS.md`, or ADRs? Only scored when standards exist; omitted otherwise.
+- **Correctness** — Does it actually solve the problem, or does it just look like it does?
+- **Completeness** — What edge cases did you miss? What scenarios did you not think about?
+- **Assumptions** — What did you assume that nobody stated? Are those assumptions going to age well?
+- **Fragility** — Would this survive a slightly different input, or is it held together with duct tape?
+- **Security** — Injection vectors, auth gaps, secrets in code, OWASP top 10. No excuses.
+- **Testing** — Tests exist? Great. Do they pass? Do they cover more than the happy path? Score 0 if none exist.
+- **Architecture** — Separation of concerns, coupling between modules, can you actually deploy and monitor this?
+- **Standards Compliance** *(conditional)* — Does the code follow your own documented conventions in `CLAUDE.md`, `AGENTS.md`, or ADRs? Only scored when standards exist; omitted when they don't. No phantom violations.
 
-Every score requires `file:line` evidence. The overall score uses `(average + lowest) / 2` — one weak dimension drags down the whole result. Scores below 80 trigger suggested improvements.
-
-Before scoring, it also checks for [reinvention risk](#reinvention-risk) and searches for [existing patterns](#standards--project-awareness) the code might be duplicating.
+The overall score uses `(average + lowest) / 2` — one weak dimension drags down the whole result. You don't get to hide behind a high average when your testing score is a 30. Scores below 80 trigger specific, actionable improvement suggestions.
 
 ### `/devils-advocate:pre`
 
-Pre-task forecast. Run before starting work:
+Pre-task forecast. Run this before starting work — it'll tell you what's going to go wrong:
 
-- **Clarity** — Is the request specific enough to act on?
-- **Feasibility** — Can an LLM do this well?
-- **Risk Level** — Where are errors most likely?
+- **Clarity** — Is the request specific enough to act on, or are you building on vibes?
+- **Feasibility** — Can an LLM actually do this well, or are you setting yourself up for disappointment?
+- **Risk Level** — Where are errors most likely to occur? What assumptions will bite you?
 
-Surfaces relevant project standards, flags reinvention risk as a predicted pitfall, and recommends whether to proceed, clarify first, or break into smaller tasks.
+Surfaces relevant project standards, flags reinvention risk before you've written a line of code, and recommends whether to proceed, clarify first, or break into smaller tasks. Cheaper to find out now than after 500 lines of code.
 
 ### `/devils-advocate:critique-plan <path>`
 
-Plan critique. Point it at a design doc or implementation plan:
+Point it at a design doc or implementation plan before you build anything:
 
 ```
 /devils-advocate:critique-plan docs/plans/my-plan.md
 ```
 
-Scores completeness, feasibility, risk spots, gaps, overscoping, security, architecture, and standards compliance. Flags dependency ordering issues and catches plans that propose building solved problems from scratch.
+Scores completeness, feasibility, risk spots, gaps, overscoping, security, architecture, and standards compliance. Catches dependency ordering issues (step 4 needs step 7's output) and plans that propose building solved problems from scratch. Architecture mistakes in the plan phase are 10x more expensive to fix after implementation.
 
 ### `/devils-advocate:second-opinion`
 
-Re-critique with a harsher adversarial lens. Independently re-scores with the mandate "assume the first critique was too lenient," then produces a delta report: where the two critiques agree, where they diverge, and what the first one missed.
+Assumes the first critique was too lenient and re-scores from scratch with a harsher lens. Produces a delta report: where the two critiques agree, where they diverge, and what the first one missed. Because the most dangerous critique is the one that let something slide.
 
 ### `/devils-advocate:log`
 
-Displays session history — total checks, average score, trend direction, and git SHA linking each check to a specific commit.
+Session history — total checks, average score, trend direction, and git SHA linking each check to a specific commit. Individual critiques are also saved to `.devils-advocate/logs/` so you can reference the full output later.
 
 ## Standards & Project Awareness
 
-All skills automatically discover your project's documented standards before evaluating:
+All skills automatically discover your project's documented standards before scoring. You wrote the rules — this plugin checks if you followed them:
 
-- **`CLAUDE.md` / `AGENTS.md`** — Conventions, required patterns, and constraints
+- **`CLAUDE.md` / `AGENTS.md`** — Your conventions, required patterns, and constraints. If you documented it, you'll be scored against it.
 - **ADR files** — Searched in `docs/adr/`, `docs/decisions/`, `adr/`, `decisions/`, `doc/architecture/decisions/`, and `**/ADR-*.md`
-- **Existing patterns** — Utilities and helpers the critiqued code might be duplicating within the codebase
+- **Existing patterns** — Utilities, helpers, and conventions already in your codebase that the critiqued code might be duplicating. Why write it twice?
 
-When standards are found, a **Standards Compliance** dimension is added that distinguishes intentional drift (acknowledged deviations) from accidental drift (conventions ignored or unknown). When no standards exist, it's omitted entirely — no noise.
+When standards are found, a **Standards Compliance** dimension is added that distinguishes intentional drift (acknowledged deviations with rationale) from accidental drift (conventions you ignored or didn't know about). When no standards exist, it's omitted entirely — no phantom violations, no noise.
 
-Projects with 50+ commits and no ADRs get a gentle advisory.
+Projects with 50+ commits and no ADRs get a gentle advisory. You've been making architectural decisions — you just haven't been writing them down.
 
 ## Reinvention Risk
 
 All skills check whether the work hand-rolls something that has battle-tested libraries — especially in domains where getting it wrong is dangerous:
 
-- **Cryptography** — custom hashing, encryption, token generation
-- **Auth** — hand-rolled sessions, JWT, OAuth, password storage
-- **Input sanitization** — custom escaping instead of parameterized queries
-- **Date/time** — manual timezone math, custom parsing
-- **Validation** — hand-written schemas instead of established validators
+- **Cryptography** — custom hashing, encryption, token generation. You are not smarter than OpenSSL.
+- **Auth** — hand-rolled sessions, JWT, OAuth, password storage. This is how breaches happen.
+- **Input sanitization** — custom escaping instead of parameterized queries. Just use the library.
+- **Date/time** — manual timezone math, custom parsing. There are entire Wikipedia articles about why this is hard.
+- **Validation** — hand-written schemas instead of established validators. You'll miss an edge case.
 
 Even technically correct custom implementations get flagged — correctness today doesn't survive the edge cases that mature libraries have already handled.
 
 ## Session Log & Hooks
 
-Every check is logged to `.devils-advocate/session.md` with a git SHA, so you can correlate scores with specific commits. Add `.devils-advocate/` to your `.gitignore`.
+Every check is logged to `.devils-advocate/session.md` with a git SHA, so you can correlate scores with specific commits. Full critique output is saved to individual files in `.devils-advocate/logs/`. Add `.devils-advocate/` to your `.gitignore`.
 
-A pre-commit hook warns you to run a critique before `git commit` — the commit still proceeds, it's just a nudge. A plan-file hook suggests running `/devils-advocate:critique-plan` when you write a plan file. Both hooks are configurable via `.devils-advocate/config.json`.
+A pre-commit hook nudges you to run a critique before committing — the commit still proceeds, it's just a reminder that you're shipping unreviewed work. A plan-file hook suggests running `/devils-advocate:critique-plan` when you write a plan file. Both hooks are configurable via `.devils-advocate/config.json`:
+
+```json
+{"hooks": {"pre-commit-warning": false, "plan-file-detect": false}}
+```
 
 ## License
 

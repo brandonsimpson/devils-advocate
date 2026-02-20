@@ -21,19 +21,19 @@ echo ""
 
 # 1. hooks.json is valid JSON
 echo "JSON validity"
-if python3 -c "import json; json.load(open('hooks/hooks.json'))" 2>/dev/null; then
+if node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'))" 2>/dev/null; then
   pass "hooks/hooks.json is valid JSON"
 else
   fail "hooks/hooks.json is invalid JSON"
 fi
 
-if python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))" 2>/dev/null; then
+if node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8'))" 2>/dev/null; then
   pass ".claude-plugin/plugin.json is valid JSON"
 else
   fail ".claude-plugin/plugin.json is invalid JSON"
 fi
 
-if python3 -c "import json; json.load(open('../.claude-plugin/marketplace.json'))" 2>/dev/null; then
+if node -e "JSON.parse(require('fs').readFileSync('../.claude-plugin/marketplace.json','utf8'))" 2>/dev/null; then
   pass ".claude-plugin/marketplace.json is valid JSON"
 else
   fail ".claude-plugin/marketplace.json is invalid JSON"
@@ -42,8 +42,8 @@ echo ""
 
 # 2. Version sync between plugin.json and marketplace.json
 echo "Version sync"
-PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
-MARKETPLACE_VERSION=$(python3 -c "import json; print(json.load(open('../.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+PLUGIN_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).version)")
+MARKETPLACE_VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('../.claude-plugin/marketplace.json','utf8')).plugins[0].version)")
 if [ "$PLUGIN_VERSION" = "$MARKETPLACE_VERSION" ]; then
   pass "plugin.json ($PLUGIN_VERSION) matches marketplace.json ($MARKETPLACE_VERSION)"
 else

@@ -33,7 +33,7 @@ echo "Plugin metadata"
 
 # plugin.json has required fields
 for field in name version description; do
-  if python3 -c "import json; d=json.load(open('.claude-plugin/plugin.json')); assert '$field' in d" 2>/dev/null; then
+  if node -e "const d=JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8'));if(!('$field' in d))process.exit(1)" 2>/dev/null; then
     pass "plugin.json has '$field' field"
   else
     fail "plugin.json missing '$field' field"
@@ -41,11 +41,9 @@ for field in name version description; do
 done
 
 # marketplace.json has required structure
-if python3 -c "
-import json
-d = json.load(open('../.claude-plugin/marketplace.json'))
-assert 'plugins' in d and len(d['plugins']) > 0
-assert 'source' in d['plugins'][0]
+if node -e "
+const d=JSON.parse(require('fs').readFileSync('../.claude-plugin/marketplace.json','utf8'));
+if(!d.plugins||!d.plugins.length||!d.plugins[0].source)process.exit(1);
 " 2>/dev/null; then
   pass "marketplace.json has valid plugin entry with source"
 else
@@ -53,11 +51,10 @@ else
 fi
 
 # Plugin name matches across files
-if python3 -c "
-import json
-p = json.load(open('.claude-plugin/plugin.json'))['name']
-m = json.load(open('../.claude-plugin/marketplace.json'))['plugins'][0]['name']
-assert p == m, f'{p} != {m}'
+if node -e "
+const p=JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).name;
+const m=JSON.parse(require('fs').readFileSync('../.claude-plugin/marketplace.json','utf8')).plugins[0].name;
+if(p!==m)process.exit(1);
 " 2>/dev/null; then
   pass "plugin name matches across plugin.json and marketplace.json"
 else
@@ -267,10 +264,9 @@ echo ""
 echo "Hook validation"
 
 # hooks.json has PreToolUse hook
-if python3 -c "
-import json
-d = json.load(open('hooks/hooks.json'))
-assert 'hooks' in d and 'PreToolUse' in d['hooks']
+if node -e "
+const d=JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'));
+if(!d.hooks||!d.hooks.PreToolUse)process.exit(1);
 " 2>/dev/null; then
   pass "hooks.json has PreToolUse hook"
 else
@@ -278,10 +274,9 @@ else
 fi
 
 # PreToolUse hook has Bash matcher
-if python3 -c "
-import json
-d = json.load(open('hooks/hooks.json'))
-assert d['hooks']['PreToolUse'][0]['matcher'] == 'Bash'
+if node -e "
+const d=JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'));
+if(d.hooks.PreToolUse[0].matcher!=='Bash')process.exit(1);
 " 2>/dev/null; then
   pass "PreToolUse hook matches on Bash tool"
 else
@@ -289,10 +284,9 @@ else
 fi
 
 # hooks.json has PostToolUse hook
-if python3 -c "
-import json
-d = json.load(open('hooks/hooks.json'))
-assert 'hooks' in d and 'PostToolUse' in d['hooks']
+if node -e "
+const d=JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'));
+if(!d.hooks||!d.hooks.PostToolUse)process.exit(1);
 " 2>/dev/null; then
   pass "hooks.json has PostToolUse hook"
 else
@@ -300,10 +294,9 @@ else
 fi
 
 # PostToolUse hook has Write matcher
-if python3 -c "
-import json
-d = json.load(open('hooks/hooks.json'))
-assert d['hooks']['PostToolUse'][0]['matcher'] == 'Write'
+if node -e "
+const d=JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'));
+if(d.hooks.PostToolUse[0].matcher!=='Write')process.exit(1);
 " 2>/dev/null; then
   pass "PostToolUse hook matches on Write tool"
 else
@@ -327,11 +320,9 @@ else
 fi
 
 # PostToolUse hook references critique-plan command
-if python3 -c "
-import json
-d = json.load(open('hooks/hooks.json'))
-cmd = d['hooks']['PostToolUse'][0]['hooks'][0]['command']
-assert 'critique-plan' in cmd
+if node -e "
+const d=JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'));
+if(!d.hooks.PostToolUse[0].hooks[0].command.includes('critique-plan'))process.exit(1);
 " 2>/dev/null; then
   pass "PostToolUse hook suggests critique-plan command"
 else
@@ -339,7 +330,7 @@ else
 fi
 
 # PostToolUse hook: fires on plan file path
-POST_CMD=$(python3 -c "import json; print(json.load(open('hooks/hooks.json'))['hooks']['PostToolUse'][0]['hooks'][0]['command'])")
+POST_CMD=$(node -e "console.log(JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8')).hooks.PostToolUse[0].hooks[0].command)")
 
 POST_MATCH=$(echo '{"tool_input":{"file_path":"/tmp/plans/design.md"}}' | eval "$POST_CMD" 2>&1)
 if echo "$POST_MATCH" | grep -q "Plan file written"; then
@@ -365,7 +356,7 @@ else
 fi
 
 # PreToolUse hook: warns on git commit without marker (non-blocking)
-PRE_CMD=$(python3 -c "import json; print(json.load(open('hooks/hooks.json'))['hooks']['PreToolUse'][0]['hooks'][0]['command'])")
+PRE_CMD=$(node -e "console.log(JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8')).hooks.PreToolUse[0].hooks[0].command)")
 rm -f .devils-advocate/.commit-reviewed
 
 PRE_WARN=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>/dev/null)
@@ -598,6 +589,56 @@ for skill in critique critique-plan second-opinion; do
     pass "skills/$skill/SKILL.md documents < 80 improvement threshold"
   else
     fail "skills/$skill/SKILL.md missing < 80 improvement threshold"
+  fi
+done
+echo ""
+
+# ---------------------------------------------------------------------------
+# 12. Individual log file instruction parity
+# ---------------------------------------------------------------------------
+echo "Individual log file instructions"
+
+# All scoring skills use consistent log file instruction structure
+# Expected pattern: ".devils-advocate/logs/check-{N}-<slug>-{YYYY-MM-DD}-{HHMM}.md"
+# Each skill should have the same sentence structure with only the slug varying
+LOG_TEMPLATE="also write the full formatted .* output (everything from the Output Format section) to"
+for skill in critique critique-plan second-opinion pre; do
+  if grep -qP "$LOG_TEMPLATE" "skills/$skill/SKILL.md" 2>/dev/null || grep -q "also write the full formatted" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has log file write instruction"
+  else
+    fail "skills/$skill/SKILL.md missing log file write instruction"
+  fi
+done
+
+# Verify each skill uses the correct slug in its log filename
+verify_slug() {
+  local skill="$1" expected="$2"
+  if grep -q "check-{N}-${expected}-{YYYY-MM-DD}" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md uses correct log slug '${expected}'"
+  else
+    fail "skills/$skill/SKILL.md has wrong log slug (expected '${expected}')"
+  fi
+}
+verify_slug critique critique
+verify_slug critique-plan plan-critique
+verify_slug second-opinion second-opinion
+verify_slug pre pre-task
+
+# All skills use the same timestamp format in log filenames
+for skill in critique critique-plan second-opinion pre; do
+  if grep -q "{YYYY-MM-DD}-{HHMM}.md" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md uses {YYYY-MM-DD}-{HHMM}.md timestamp format"
+  else
+    fail "skills/$skill/SKILL.md uses inconsistent timestamp format"
+  fi
+done
+
+# All skills instruct to create the logs/ directory
+for skill in critique critique-plan second-opinion pre; do
+  if grep -q "Create the \`logs/\` directory if it doesn't exist" "skills/$skill/SKILL.md"; then
+    pass "skills/$skill/SKILL.md has logs/ directory creation instruction"
+  else
+    fail "skills/$skill/SKILL.md missing logs/ directory creation instruction"
   fi
 done
 echo ""
