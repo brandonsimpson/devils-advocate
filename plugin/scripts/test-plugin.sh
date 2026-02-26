@@ -366,11 +366,11 @@ else
   fail "PreToolUse hook silent on git commit without marker"
 fi
 
-# PreToolUse hook: does NOT block (uses systemMessage, not permissionDecision)
-if echo "$PRE_STDOUT" | grep -q "systemMessage" && ! echo "$PRE_STDOUT" | grep -q "permissionDecision"; then
+# PreToolUse hook: does NOT block (uses additionalContext, not permissionDecision deny)
+if echo "$PRE_STDOUT" | grep -q "additionalContext" && ! echo "$PRE_STDOUT" | grep -q '"permissionDecision":"deny"'; then
   pass "PreToolUse hook does not block commit (warning only)"
 else
-  fail "PreToolUse hook missing systemMessage or has permissionDecision: $PRE_STDOUT"
+  fail "PreToolUse hook missing additionalContext or has deny decision: $PRE_STDOUT"
 fi
 
 # PreToolUse hook: silent when marker exists (critique already run)

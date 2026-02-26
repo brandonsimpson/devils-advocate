@@ -32,13 +32,14 @@ Step 4: Check for critique marker
     → fs.unlinkSync removes it (consumed — one commit allowed per critique)
     → No output
   If marker does NOT exist:
-    → Write JSON to stdout with systemMessage field (non-blocking warning)
-    → Claude Code displays systemMessage to the user without blocking the commit
+    → Write JSON to stdout with hookSpecificOutput.additionalContext
+    → additionalContext is injected into Claude's conversation context
+    → Claude sees the warning and relays it to the user
     → "No critique found for uncommitted changes"
 
 Step 5: Safe exit
   All code wrapped in try/catch — errors never propagate
-  Output uses systemMessage JSON on stdout — shown to user without blocking
+  Output uses additionalContext JSON on stdout — added to Claude's context
 ```
 
 ## PostToolUse: plan-file-detect
@@ -59,8 +60,9 @@ Step 3: Check if path matches plan file patterns
   Does NOT match: explanation.md, planet.md, src/planner.ts
 
 Step 4: Print suggestion
-  Write JSON to stdout with systemMessage field
-  Claude Code displays systemMessage to the user without blocking
+  Write JSON to stdout with additionalContext field
+  additionalContext is injected into Claude's conversation context
+  Claude sees the suggestion and relays it to the user
   Suggests running /devils-advocate:critique-plan <path>
 
 Step 5: Safe exit
