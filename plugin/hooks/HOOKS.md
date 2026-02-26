@@ -30,14 +30,15 @@ Step 3: Check if it's a git commit
 Step 4: Check for critique marker
   If .devils-advocate/.commit-reviewed exists:
     → fs.unlinkSync removes it (consumed — one commit allowed per critique)
-    → No warning printed
+    → No output
   If marker does NOT exist:
-    → Print yellow warning to stderr via process.stderr.write (non-blocking)
+    → Write JSON to stdout with systemMessage field (non-blocking warning)
+    → Claude Code displays systemMessage to the user without blocking the commit
     → "No critique found for uncommitted changes"
 
 Step 5: Safe exit
   All code wrapped in try/catch — errors never propagate
-  Output to stderr only — stdout would block Claude Code
+  Output uses systemMessage JSON on stdout — shown to user without blocking
 ```
 
 ## PostToolUse: plan-file-detect
@@ -58,7 +59,9 @@ Step 3: Check if path matches plan file patterns
   Does NOT match: explanation.md, planet.md, src/planner.ts
 
 Step 4: Print suggestion
-  Yellow text to stderr suggesting /devils-advocate:critique-plan <path>
+  Write JSON to stdout with systemMessage field
+  Claude Code displays systemMessage to the user without blocking
+  Suggests running /devils-advocate:critique-plan <path>
 
 Step 5: Safe exit
   All code wrapped in try/catch — errors never propagate

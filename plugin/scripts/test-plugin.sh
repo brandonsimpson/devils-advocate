@@ -359,19 +359,18 @@ fi
 PRE_CMD=$(node -e "console.log(JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8')).hooks.PreToolUse[0].hooks[0].command)")
 rm -f .devils-advocate/.commit-reviewed
 
-PRE_WARN=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>/dev/null)
-PRE_STDERR=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1 >/dev/null)
-if echo "$PRE_STDERR" | grep -q "No critique found"; then
+PRE_STDOUT=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>/dev/null)
+if echo "$PRE_STDOUT" | grep -q "No critique found"; then
   pass "PreToolUse hook warns on git commit without marker"
 else
   fail "PreToolUse hook silent on git commit without marker"
 fi
 
-# PreToolUse hook: does NOT block (no JSON decision on stdout)
-if [ -z "$PRE_WARN" ]; then
+# PreToolUse hook: does NOT block (uses systemMessage, not permissionDecision)
+if echo "$PRE_STDOUT" | grep -q "systemMessage" && ! echo "$PRE_STDOUT" | grep -q "permissionDecision"; then
   pass "PreToolUse hook does not block commit (warning only)"
 else
-  fail "PreToolUse hook outputs to stdout (would block): $PRE_WARN"
+  fail "PreToolUse hook missing systemMessage or has permissionDecision: $PRE_STDOUT"
 fi
 
 # PreToolUse hook: silent when marker exists (critique already run)
@@ -405,7 +404,7 @@ else
 fi
 
 # PreToolUse hook: warns on git commit --amend without marker
-PRE_AMEND=$(echo '{"tool_input":{"command":"git commit --amend"}}' | eval "$PRE_CMD" 2>&1 >/dev/null)
+PRE_AMEND=$(echo '{"tool_input":{"command":"git commit --amend"}}' | eval "$PRE_CMD" 2>/dev/null)
 if echo "$PRE_AMEND" | grep -q "No critique found"; then
   pass "PreToolUse hook warns on git commit --amend without marker"
 else
