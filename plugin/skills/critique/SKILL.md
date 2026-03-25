@@ -174,15 +174,24 @@ Consider adopting ADRs to document key decisions.
 
 ## If Score < 80
 
-When the overall score is below 80, add a **Suggested Improvements** section:
+When the overall score is below 80, add a **Suggested Improvements** section. List ALL identified improvements, categorized by criticality. Do not cap or limit the number — include every actionable improvement you found:
 
 ```
-Suggested Improvements:
-1. [specific, actionable improvement]
-2. [specific, actionable improvement]
+Suggested Improvements (by criticality):
 
-Would you like me to implement these improvements?
+Critical — issues that will cause failures, security vulnerabilities, or data loss:
+• [improvement with file:line reference]
+
+Important — issues that significantly weaken the solution or violate conventions:
+• [improvement with file:line reference]
+
+Minor — nice-to-have improvements, style nits, or small optimizations:
+• [improvement with file:line reference]
+
+Would you like me to implement these improvements? (specify critical/important/minor or all)
 ```
+
+Omit any criticality tier that has no items. Every improvement must be specific and actionable with a file:line reference where applicable.
 
 **IMPORTANT:** Do NOT implement improvements automatically. Present them and wait for user approval.
 

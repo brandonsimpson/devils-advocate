@@ -146,9 +146,16 @@ Concerns:
 Dependency Issues:
 • [any ordering problems — or "None found"]
 
-Suggestions:
-1. [specific improvement]
-2. [specific improvement]
+Suggested Improvements (by criticality):
+
+Critical — issues that will cause failures, security vulnerabilities, or data loss:
+• [improvement with reference to plan section]
+
+Important — issues that significantly weaken the plan or violate conventions:
+• [improvement with reference to plan section]
+
+Minor — nice-to-have improvements or small optimizations:
+• [improvement with reference to plan section]
 
 Unverified:
 • [what you did NOT verify — MANDATORY, at least one item]
