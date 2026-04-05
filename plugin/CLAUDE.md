@@ -13,36 +13,35 @@ The plugin follows the Claude Code plugin structure:
 - **`plugin/.claude-plugin/plugin.json`** — Plugin metadata (name, version, description). Version here is the source of truth.
 - **`.claude-plugin/marketplace.json`** — Marketplace registry entry (lives at repo root, not inside `plugin/`). Source points to `./plugin`. Version must stay in sync with `plugin.json`.
 - **`skills/`** — Each subdirectory contains a `SKILL.md` file that defines a slash command:
-  - `critique/` → `/devils-advocate:critique` — Post-task adversarial scoring across 7 dimensions (+ conditional Standards Compliance)
-  - `pre/` → `/devils-advocate:pre` — Pre-task feasibility forecast
-  - `critique-plan/` → `/devils-advocate:critique-plan <path>` — Plan document review
-  - `second-opinion/` → `/devils-advocate:second-opinion` — Independent re-evaluation of prior critique
+  - `critique/` → `/devils-advocate:critique` — Binary pass/fail critique of code or plan documents. Auto-detects target type. 17 criteria for code (7 dimensions), 19 criteria for plans (9 dimensions).
   - `log/` → `/devils-advocate:log` — Display session history
 - **`hooks/HOOKS.md`** — Companion documentation explaining the inline hook logic step-by-step (hooks are `node -e` one-liners due to plugin path constraints).
 - **`hooks/hooks.json`** — Registers two hooks:
-  - `PreToolUse` hook (Bash, key: `pre-commit-warning`) — prints a non-blocking warning on `git commit` if no `.devils-advocate/.commit-reviewed` marker exists, nudging the user to run critique first. The commit proceeds regardless. The marker is created by scoring skills after writing the session log and consumed (deleted) on the next commit, suppressing the warning when critique has already been performed.
-  - `PostToolUse` hook (Write, key: `plan-file-detect`) — detects when a plan file is written (matching paths with `plan`/`plans` in the name or directory) and suggests running `/devils-advocate:critique-plan`
+  - `PreToolUse` hook (Bash, key: `pre-commit-warning`) — prints a non-blocking warning on `git commit` if no `.devils-advocate/.commit-reviewed` marker exists, nudging the user to run critique first. The commit proceeds regardless. The marker is created by the critique skill after writing the session log and consumed (deleted) on the next commit, suppressing the warning when critique has already been performed.
+  - `PostToolUse` hook (Write, key: `plan-file-detect`) — detects when a plan file is written (matching paths with `plan`/`plans` in the name or directory) and suggests running `/devils-advocate:critique`
   - All hooks are **configurable** via `.devils-advocate/config.json` in the user's project. All hooks are on by default. To disable a hook, set its key to `false` under `hooks`: `{"hooks":{"pre-commit-warning":false}}`
 
 ## Key Conventions
 
+- **Binary evaluation** — All critiques use binary pass/fail per criterion. No percentage scores. Each criterion either PASS or FAIL. Every FAIL must cite `file:line` evidence and include a `Fix:` suggestion.
+- **Two criteria sets** — Code critiques use 17 criteria across 7 dimensions (Correctness, Security, Quality, Performance, Consistency, Integration). Plan critiques use 19 criteria across 9 dimensions (Completeness, Correctness, Testability, Security, Consistency, Simplicity, Dependencies, Resilience, Integration).
+- **Auto-detection** — The critique skill determines whether it's reviewing code or a plan based on conversation context. No explicit mode flag needed.
 - **SKILL.md frontmatter** — Each skill has YAML frontmatter with `name` and `description`. The `description` field must be short enough to avoid `ENAMETOOLONG` errors during plugin installation (this was a real bug — see commit `b381119`).
-- **Session log** — All skills that produce scores append entries to `.devils-advocate/session.md` in the user's project (not this repo). Entries include git SHA, timestamp, and check number. The log skill only reads, never writes.
-- **Individual log files** — Each scoring skill also writes the full formatted output to `.devils-advocate/logs/check-{N}-{type}-{YYYY-MM-DD}-{HHMM}.md`. This preserves the complete critique for later reference. The log skill lists available log files.
-- **Scope-bounded critique** — Skills explicitly instruct Claude to only critique what was requested, never penalize for out-of-scope features. Testing, security, and standards compliance are the three exceptions that are always evaluated (standards compliance only when standards files exist).
-- **Standards discovery** — All four scoring skills (`critique`, `critique-plan`, `second-opinion`, `pre`) include a standards discovery step that reads `CLAUDE.md`, `AGENTS.md`, and searches for ADR files. The three post-work skills (`critique`, `critique-plan`, `second-opinion`) add a conditional "Standards Compliance" scoring dimension when standards are found; it is omitted entirely when no standards exist. The `pre` skill weaves discovered standards into its existing evaluations without adding a new dimension.
-- **Existing patterns detection** — The `critique` and `second-opinion` skills grep for existing utilities/helpers/conventions that the critiqued code might be duplicating within the codebase.
-- **Reinvention risk detection** — All four scoring skills check whether the work builds custom implementations of problems that have well-established, battle-tested solutions (e.g., hand-rolled crypto, custom auth, manual input sanitization). This is distinct from "existing patterns" which looks within the codebase — reinvention risk looks at the industry-wide landscape of solved problems.
-- **ADR advisory** — When no ADR files are found in a project with 50+ commits, skills display an advisory suggesting the project adopt architectural decision records.
-- **Context gates** — All four scoring skills (`critique`, `pre`, `critique-plan`, `second-opinion`) have a Step 0 that refuses to produce scores if Claude lacks sufficient context. The `second-opinion` gate additionally verifies a prior critique exists in the session log. This prevents false-confidence scoring.
-- **Evidence requirement** — Critique scores must cite `file:line` references. Scores without evidence are invalid. Standards Compliance scores must cite both the standard source and the drifting code.
+- **Session log** — The critique skill appends entries to `.devils-advocate/session.md` in the user's project (not this repo). Entries include git SHA, timestamp, check number, and pass count. The log skill only reads, never writes.
+- **Individual log files** — The critique skill also writes the full formatted output to `.devils-advocate/logs/check-{N}-critique-{YYYY-MM-DD}-{HHMM}.md`. This preserves the complete critique for later reference. The log skill lists available log files.
+- **Scope-bounded critique** — The critique skill only evaluates what was requested, never penalizes for out-of-scope features. If a criterion doesn't apply, it's marked PASS with a note.
+- **Standards discovery** — The critique skill reads `CLAUDE.md`, `AGENTS.md`, and searches for ADR files. Standards violations cause relevant criteria to FAIL.
+- **Existing patterns detection** — In code mode, the critique skill greps for existing utilities/helpers/conventions that the critiqued code might be duplicating.
+- **Context gate** — The critique skill refuses to produce results if it lacks sufficient context. This prevents false-confidence scoring.
+- **Evidence requirement** — Every FAIL must cite `file:line` references. Results without evidence are invalid.
+- **Unverified section** — Mandatory in every critique. Must list at least one thing not checked.
 - **Version syncing** — When bumping versions, update both `plugin.json` and `marketplace.json`.
 
 ## Working in This Repo
 
 Changes are validated by:
-1. Running `bash plugin/scripts/check-consistency.sh` — automated checks for JSON validity, version sync, cross-skill consistency (calibration anchors, context gates, reinvention risk, unverified sections, scope-bounded critique, session log references, overconfidence check, skeptical take, strengths section, weaknesses section, directory creation instructions, existing patterns detection), and frontmatter description lengths
-2. Running `bash plugin/scripts/test-plugin.sh` — deeper test suite covering plugin metadata, frontmatter validation, scoring formula consistency, session log format, output format dimension parity, output section parity, hook validation, standards discovery, evidence requirements, context gate refusal format, CLAUDE.md accuracy, and score threshold documentation
+1. Running `bash plugin/scripts/check-consistency.sh` — automated checks for JSON validity, version sync, binary criteria presence, context gate, unverified section, session log references, evidence requirements, and frontmatter description lengths
+2. Running `bash plugin/scripts/test-plugin.sh` — deeper test suite covering plugin metadata, frontmatter validation, binary criteria completeness, session log format, output format structure, hook validation, standards discovery, context gate refusal format, and CLAUDE.md accuracy
 3. Reading the skill Markdown for correctness
 4. Installing the plugin locally and invoking the slash commands
 
@@ -51,3 +50,5 @@ To test locally: install the plugin via `claude --plugin-dir ./plugin` from the 
 ## Historical Context
 
 This plugin was renamed from `confidence-loops` / `confidence-loop` to `devils-advocate`. The `.confidence-loop/` directory contains legacy session data from before the rename. The `docs/` directory (gitignored) contains original design and implementation plans.
+
+v3.0.0 consolidated four scoring skills (`critique`, `critique-plan`, `pre`, `second-opinion`) into a single `critique` skill with binary pass/fail evaluation. Percentage scoring was removed entirely. The `pre` skill was unused, `second-opinion` existed to compensate for lenient percentage scoring (which binary eval solves), and `critique-plan` was folded into `critique` via auto-detection.

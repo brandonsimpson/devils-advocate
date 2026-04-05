@@ -12,7 +12,7 @@
       "name": "devils-advocate",
       "source": "./plugin",
       "description": "Claude's harshest critic. Evidence required. Perfection impossible.",
-      "version": "2.4.0"
+      "version": "3.0.0"
     }
   ]
 }

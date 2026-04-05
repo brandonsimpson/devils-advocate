@@ -5,23 +5,19 @@ description: Display session log of all checks and scores.
 
 # Session Log
 
-Display the confidence assessment history for this session.
+Display the critique history for this session.
 
 ## Process
 
 1. **Read the session log** — Use the Read tool to read `.devils-advocate/session.md` from the project root.
 
-2. **If the file doesn't exist or is empty** — Report that no checks have been run yet and suggest available commands:
-   - `/devils-advocate:critique` — Critique current solution
-   - `/devils-advocate:pre` — Pre-task forecast
-   - `/devils-advocate:critique-plan <path>` — Review a plan file
-   - `/devils-advocate:second-opinion` — Re-critique with a different adversarial lens
+2. **If the file doesn't exist or is empty** — Report that no checks have been run yet and suggest:
+   - `/devils-advocate:critique` — Critique current code or a plan document
 
 3. **If the file exists** — Display its contents and add a brief summary:
    - Total number of checks run
-   - Average score across all checks
-   - Trend (improving, declining, or stable)
-   - Lowest-scoring check (the one that needs most attention)
+   - Pass rate trend (improving, declining, or stable)
+   - Worst result (the check with the most failing criteria)
    - Note: Each entry includes a git SHA linking the check to a specific commit
 
 4. **List individual log files** — Use Glob to check for files in `.devils-advocate/logs/*.md`. If any exist, list their filenames so the user knows which detailed critiques are available to read.
@@ -30,13 +26,13 @@ Display the confidence assessment history for this session.
 
 ```
 SESSION LOG
-═══════════════════════════════════════
+═════���═════════════════════════════════
 
 [contents of .devils-advocate/session.md]
 
-───────────────────────────────────────
-Summary: N checks | Avg: XX/100 | Trend: [improving/declining/stable]
-Lowest:  Check #X (XX/100) @ <sha> — [brief note]
+─────────��─────────────────────────────
+Summary: N checks | Trend: [improving/declining/stable]
+Worst:   Check #X (Y/Z PASS) @ <sha> — [brief note]
 
 Detailed Logs: [only if .devils-advocate/logs/ has files]
 • [filename1]

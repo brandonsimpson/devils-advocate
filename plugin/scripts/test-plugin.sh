@@ -3,7 +3,7 @@
 # Run from the repo root: bash plugin/scripts/test-plugin.sh
 #
 # Tests go beyond check-consistency.sh by validating semantic content,
-# output format templates, scoring formulas, and structural invariants.
+# output format templates, binary criteria completeness, and structural invariants.
 
 set -euo pipefail
 
@@ -103,163 +103,127 @@ done
 echo ""
 
 # ---------------------------------------------------------------------------
-# 3. Scoring formula consistency
+# 3. Binary criteria completeness
 # ---------------------------------------------------------------------------
-echo "Scoring formula"
+echo "Binary criteria completeness — Code (17 criteria)"
 
-# All skills using the overall score formula must use the same formula
-for skill in critique critique-plan second-opinion; do
-  if grep -q "(average + lowest) / 2" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md uses correct scoring formula"
+CODE_CRITERIA="tests-pass logic-correct edge-cases no-secrets input-validated no-injection auth-enforced no-dead-code no-placeholders error-handling no-obvious-perf types-consistent naming-matches patterns-followed imports-correct tests-exist no-regressions"
+for criterion in $CODE_CRITERIA; do
+  if grep -q "$criterion" "skills/critique/SKILL.md"; then
+    pass "code criterion: $criterion"
   else
-    fail "skills/$skill/SKILL.md missing or incorrect scoring formula"
+    fail "code criterion missing: $criterion"
+  fi
+done
+echo ""
+
+echo "Binary criteria completeness — Plan (19 criteria)"
+
+PLAN_CRITERIA="req-coverage no-placeholders edge-cases api-verified patterns-correct tests-per-step verification no-secrets input-validated auth-designed types-consistent naming-matches no-overengineering no-reinvention correct-order deps-available rollback-plan perf-considered imports-correct follows-patterns"
+for criterion in $PLAN_CRITERIA; do
+  if grep -q "$criterion" "skills/critique/SKILL.md"; then
+    pass "plan criterion: $criterion"
+  else
+    fail "plan criterion missing: $criterion"
   fi
 done
 echo ""
 
 # ---------------------------------------------------------------------------
-# 4. Session log format consistency
+# 4. Session log format
 # ---------------------------------------------------------------------------
 echo "Session log format"
 
-# critique uses "Post-task" format
-if grep -q "Post-task" "skills/critique/SKILL.md"; then
-  pass "skills/critique/SKILL.md uses 'Post-task' log label"
+# Critique uses "Critique" label
+if grep -q "Critique" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md uses 'Critique' log label"
 else
-  fail "skills/critique/SKILL.md missing 'Post-task' log label"
+  fail "skills/critique/SKILL.md missing 'Critique' log label"
 fi
 
-# critique-plan uses "Plan critique" format
-if grep -q "Plan critique" "skills/critique-plan/SKILL.md"; then
-  pass "skills/critique-plan/SKILL.md uses 'Plan critique' log label"
+# References git SHA in session log
+if grep -q "git rev-parse --short HEAD" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md references git SHA for session log"
 else
-  fail "skills/critique-plan/SKILL.md missing 'Plan critique' log label"
+  fail "skills/critique/SKILL.md missing git SHA reference in session log"
 fi
 
-# second-opinion uses "Second opinion" format
-if grep -q "Second opinion" "skills/second-opinion/SKILL.md"; then
-  pass "skills/second-opinion/SKILL.md uses 'Second opinion' log label"
+# Uses binary result format (X/Y PASS)
+if grep -q "PASS" "skills/critique/SKILL.md" && grep -q "Result:" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md uses binary result format"
 else
-  fail "skills/second-opinion/SKILL.md missing 'Second opinion' log label"
+  fail "skills/critique/SKILL.md missing binary result format"
 fi
-
-# pre uses "Pre-task" format
-if grep -q "Pre-task" "skills/pre/SKILL.md"; then
-  pass "skills/pre/SKILL.md uses 'Pre-task' log label"
-else
-  fail "skills/pre/SKILL.md missing 'Pre-task' log label"
-fi
-
-# All scoring skills reference git SHA in session log
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "git rev-parse --short HEAD" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md references git SHA for session log"
-  else
-    fail "skills/$skill/SKILL.md missing git SHA reference in session log"
-  fi
-done
 echo ""
 
 # ---------------------------------------------------------------------------
-# 5. Output format templates — required sections
+# 5. Output format — required sections
 # ---------------------------------------------------------------------------
-echo "Output format templates"
+echo "Output format"
 
-# critique and second-opinion must have the same scored dimensions
-CRITIQUE_DIMS="Correctness Completeness Assumptions Fragility Security Testing Architecture"
-for dim in $CRITIQUE_DIMS; do
-  for skill in critique second-opinion; do
-    if grep -q "$dim:" "skills/$skill/SKILL.md"; then
-      pass "skills/$skill/SKILL.md output has $dim dimension"
-    else
-      fail "skills/$skill/SKILL.md output missing $dim dimension"
-    fi
-  done
-done
-
-# critique-plan has its own dimension set
-PLAN_DIMS="Completeness Feasibility Gaps Overscoping Security Architecture"
-for dim in $PLAN_DIMS; do
-  if grep -q "$dim:" "skills/critique-plan/SKILL.md"; then
-    pass "skills/critique-plan/SKILL.md output has $dim dimension"
-  else
-    fail "skills/critique-plan/SKILL.md output missing $dim dimension"
-  fi
-done
-
-# pre has its own dimension set
-PRE_DIMS="Clarity Feasibility"
-for dim in $PRE_DIMS; do
-  if grep -q "$dim:" "skills/pre/SKILL.md"; then
-    pass "skills/pre/SKILL.md output has $dim dimension"
-  else
-    fail "skills/pre/SKILL.md output missing $dim dimension"
-  fi
-done
-
-# All scoring skills have "Overall Score" or "Forecast" in output
-for skill in critique critique-plan second-opinion; do
-  if grep -q "Overall Score:" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md output has Overall Score"
-  else
-    fail "skills/$skill/SKILL.md output missing Overall Score"
-  fi
-done
-
-if grep -q "Forecast:" "skills/pre/SKILL.md"; then
-  pass "skills/pre/SKILL.md output has Forecast"
+# Has the binary eval header
+if grep -q "Binary Eval" "skills/critique/SKILL.md"; then
+  pass "output format has Binary Eval header"
 else
-  fail "skills/pre/SKILL.md output missing Forecast"
+  fail "output format missing Binary Eval header"
 fi
 
-# Conditional Standards Compliance in post-work skills
-for skill in critique critique-plan second-opinion; do
-  if grep -q "Standards Compliance" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has conditional Standards Compliance"
-  else
-    fail "skills/$skill/SKILL.md missing Standards Compliance dimension"
-  fi
-done
+# Has Target line
+if grep -q "^Target:" "skills/critique/SKILL.md"; then
+  pass "output format has Target line"
+else
+  fail "output format missing Target line"
+fi
 
-# Reinvention Risk output section
-for skill in critique critique-plan second-opinion pre; do
-  if grep -qi "Reinvention Risk" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Reinvention Risk output section"
-  else
-    fail "skills/$skill/SKILL.md missing Reinvention Risk output section"
-  fi
-done
+# Has Result line
+if grep -q "^Result:" "skills/critique/SKILL.md"; then
+  pass "output format has Result line"
+else
+  fail "output format missing Result line"
+fi
+
+# Has Failing criteria section
+if grep -q "Failing criteria with fixes" "skills/critique/SKILL.md"; then
+  pass "output format has Failing criteria section"
+else
+  fail "output format missing Failing criteria section"
+fi
+
+# Has Unverified section
+if grep -q "^Unverified:" "skills/critique/SKILL.md"; then
+  pass "output format has Unverified section"
+else
+  fail "output format missing Unverified section"
+fi
+
+# No percentage scoring remnants in output
+if grep -q "Overall Score:" "skills/critique/SKILL.md"; then
+  fail "output format still has percentage Overall Score"
+else
+  pass "output format has no percentage Overall Score"
+fi
+
+if grep -q "Skeptical Take:" "skills/critique/SKILL.md"; then
+  fail "output format still has Skeptical Take (removed in v3)"
+else
+  pass "output format has no Skeptical Take"
+fi
+
+if grep -q "^Strengths:" "skills/critique/SKILL.md"; then
+  fail "output format still has Strengths section (removed in v3)"
+else
+  pass "output format has no Strengths section"
+fi
+
+if grep -q "^Weaknesses:" "skills/critique/SKILL.md"; then
+  fail "output format still has Weaknesses section (removed in v3)"
+else
+  pass "output format has no Weaknesses section"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# 6. Output section parity (critique vs second-opinion)
-# ---------------------------------------------------------------------------
-echo "Output section parity"
-
-# Sections that must appear in both critique and second-opinion output formats
-OUTPUT_SECTIONS="Strengths Weaknesses"
-for section in $OUTPUT_SECTIONS; do
-  for skill in critique second-opinion; do
-    if grep -q "^${section}:" "skills/$skill/SKILL.md"; then
-      pass "skills/$skill/SKILL.md output has $section section"
-    else
-      fail "skills/$skill/SKILL.md output missing $section section"
-    fi
-  done
-done
-
-# Skeptical Take in both
-for skill in critique second-opinion; do
-  if grep -q "^Skeptical Take:" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md output has Skeptical Take section"
-  else
-    fail "skills/$skill/SKILL.md output missing Skeptical Take section"
-  fi
-done
-echo ""
-
-# ---------------------------------------------------------------------------
-# 7. Hook validation
+# 6. Hook validation
 # ---------------------------------------------------------------------------
 echo "Hook validation"
 
@@ -303,7 +267,7 @@ else
   fail "PostToolUse hook missing Write matcher"
 fi
 
-# All hook commands use node (not python3 or bash)
+# All hook commands use node
 NODE_COUNT=$(grep -c '"command": "node -e' "hooks/hooks.json")
 COMMAND_COUNT=$(grep -c '"command":' "hooks/hooks.json")
 if [ "$NODE_COUNT" -eq "$COMMAND_COUNT" ]; then
@@ -319,14 +283,16 @@ else
   fail "hook commands missing plugin name reference"
 fi
 
-# PostToolUse hook references critique-plan command
+# PostToolUse hook references critique command (not critique-plan)
 if node -e "
 const d=JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'));
-if(!d.hooks.PostToolUse[0].hooks[0].command.includes('critique-plan'))process.exit(1);
+const cmd=d.hooks.PostToolUse[0].hooks[0].command;
+if(!cmd.includes('critique'))process.exit(1);
+if(cmd.includes('critique-plan'))process.exit(1);
 " 2>/dev/null; then
-  pass "PostToolUse hook suggests critique-plan command"
+  pass "PostToolUse hook suggests /critique (not /critique-plan)"
 else
-  fail "PostToolUse hook missing critique-plan suggestion"
+  fail "PostToolUse hook references wrong command"
 fi
 
 # PostToolUse hook: fires on plan file path
@@ -376,8 +342,6 @@ fi
 # PreToolUse hook: silent when marker exists (critique already run)
 mkdir -p .devils-advocate
 touch .devils-advocate/.commit-reviewed
-PRE_QUIET_STDERR=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1 >/dev/null)
-PRE_QUIET_STDOUT=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>/dev/null)
 # Need to recreate marker since previous call consumed it
 touch .devils-advocate/.commit-reviewed
 PRE_ALL=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1)
@@ -419,14 +383,12 @@ else
   fail "PreToolUse hook crashes on empty input"
 fi
 
-# Commit-approved marker instruction in scoring skills
-for skill in critique critique-plan second-opinion; do
-  if grep -q "commit-reviewed" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md creates commit-reviewed marker"
-  else
-    fail "skills/$skill/SKILL.md missing commit-reviewed marker instruction"
-  fi
-done
+# Commit-approved marker instruction in critique skill
+if grep -q "commit-reviewed" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md creates commit-reviewed marker"
+else
+  fail "skills/critique/SKILL.md missing commit-reviewed marker instruction"
+fi
 
 # Hook config: all hooks respect disabled config
 mkdir -p .devils-advocate
@@ -449,7 +411,6 @@ fi
 # Hook config: hooks ON when config file missing
 rm -f .devils-advocate/config.json
 
-PRE_DEFAULT=$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1 >/dev/null)
 if echo "$(echo '{"tool_input":{"command":"git commit -m \"test\""}}' | eval "$PRE_CMD" 2>&1)" | grep -q "No critique found"; then
   pass "PreToolUse hook defaults to enabled without config"
 else
@@ -478,7 +439,7 @@ else
 fi
 
 POST_MALFORMED=$(echo '{"tool_input":{"file_path":"/tmp/plans/test.md"}}' | eval "$POST_CMD" 2>&1)
-if echo "$POST_MALFORMED" | grep -q "critique-plan"; then
+if echo "$POST_MALFORMED" | grep -q "critique"; then
   pass "PostToolUse hook degrades gracefully on malformed config.json"
 else
   fail "PostToolUse hook crashes on malformed config.json"
@@ -488,27 +449,21 @@ rm -f .devils-advocate/config.json .devils-advocate/.commit-reviewed
 echo ""
 
 # ---------------------------------------------------------------------------
-# 7. Standards discovery consistency
+# 7. Standards discovery
 # ---------------------------------------------------------------------------
 echo "Standards discovery"
 
-# All scoring skills check for CLAUDE.md and AGENTS.md
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "CLAUDE.md" "skills/$skill/SKILL.md" && grep -q "AGENTS.md" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md checks for CLAUDE.md and AGENTS.md"
-  else
-    fail "skills/$skill/SKILL.md missing CLAUDE.md/AGENTS.md check"
-  fi
-done
+if grep -q "CLAUDE.md" "skills/critique/SKILL.md" && grep -q "AGENTS.md" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md checks for CLAUDE.md and AGENTS.md"
+else
+  fail "skills/critique/SKILL.md missing CLAUDE.md/AGENTS.md check"
+fi
 
-# All scoring skills search for ADR files
-for skill in critique critique-plan second-opinion pre; do
-  if grep -qi "ADR" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md searches for ADR files"
-  else
-    fail "skills/$skill/SKILL.md missing ADR search"
-  fi
-done
+if grep -qi "ADR" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md searches for ADR files"
+else
+  fail "skills/critique/SKILL.md missing ADR search"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -516,14 +471,11 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "Evidence requirement"
 
-# Post-work skills require file:line evidence
-for skill in critique second-opinion; do
-  if grep -q 'file:line' "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md requires file:line evidence"
-  else
-    fail "skills/$skill/SKILL.md missing file:line evidence requirement"
-  fi
-done
+if grep -q 'file:line' "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md requires file:line evidence"
+else
+  fail "skills/critique/SKILL.md missing file:line evidence requirement"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -531,14 +483,11 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "Context gate refusal format"
 
-# All gated skills have CONTEXT INSUFFICIENT output
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "CONTEXT INSUFFICIENT" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has CONTEXT INSUFFICIENT refusal block"
-  else
-    fail "skills/$skill/SKILL.md missing CONTEXT INSUFFICIENT refusal block"
-  fi
-done
+if grep -q "CONTEXT INSUFFICIENT" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has CONTEXT INSUFFICIENT refusal block"
+else
+  fail "skills/critique/SKILL.md missing CONTEXT INSUFFICIENT refusal block"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -546,8 +495,8 @@ echo ""
 # ---------------------------------------------------------------------------
 echo "CLAUDE.md accuracy"
 
-# CLAUDE.md says 5 skills exist — verify
-EXPECTED_SKILLS="critique critique-plan log pre second-opinion"
+# CLAUDE.md says 2 skills exist — verify
+EXPECTED_SKILLS="critique log"
 ACTUAL_SKILLS=$(ls -d skills/*/ 2>/dev/null | xargs -I{} basename {} | sort | tr '\n' ' ' | sed 's/ $//')
 if [ "$ACTUAL_SKILLS" = "$EXPECTED_SKILLS" ]; then
   pass "skill directories match CLAUDE.md documentation"
@@ -555,14 +504,14 @@ else
   fail "skill directories ($ACTUAL_SKILLS) don't match expected ($EXPECTED_SKILLS)"
 fi
 
-# CLAUDE.md says hook is in hooks/hooks.json
+# hooks/hooks.json exists as documented
 if [ -f "hooks/hooks.json" ]; then
   pass "hooks/hooks.json exists as documented in CLAUDE.md"
 else
   fail "hooks/hooks.json missing (documented in CLAUDE.md)"
 fi
 
-# CLAUDE.md says version source of truth is plugin.json
+# plugin.json exists as documented
 if [ -f ".claude-plugin/plugin.json" ]; then
   pass "plugin.json exists as documented in CLAUDE.md"
 else
@@ -578,68 +527,45 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# 11. Score threshold documentation
-# ---------------------------------------------------------------------------
-echo "Score threshold"
-
-# All post-work skills document the < 80 threshold for suggestions
-for skill in critique critique-plan second-opinion; do
-  if grep -q "Score < 80" "skills/$skill/SKILL.md" || grep -q "score < 80" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md documents < 80 improvement threshold"
-  else
-    fail "skills/$skill/SKILL.md missing < 80 improvement threshold"
-  fi
-done
-echo ""
-
-# ---------------------------------------------------------------------------
-# 12. Individual log file instruction parity
+# 11. Individual log file instructions
 # ---------------------------------------------------------------------------
 echo "Individual log file instructions"
 
-# All scoring skills use consistent log file instruction structure
-# Expected pattern: ".devils-advocate/logs/check-{N}-<slug>-{YYYY-MM-DD}-{HHMM}.md"
-# Each skill should have the same sentence structure with only the slug varying
-LOG_TEMPLATE="also write the full formatted .* output (everything from the Output Format section) to"
-for skill in critique critique-plan second-opinion pre; do
-  if grep -qP "$LOG_TEMPLATE" "skills/$skill/SKILL.md" 2>/dev/null || grep -q "also write the full formatted" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has log file write instruction"
-  else
-    fail "skills/$skill/SKILL.md missing log file write instruction"
-  fi
-done
+if grep -q "also write the full formatted" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has log file write instruction"
+else
+  fail "skills/critique/SKILL.md missing log file write instruction"
+fi
 
-# Verify each skill uses the correct slug in its log filename
-verify_slug() {
-  local skill="$1" expected="$2"
-  if grep -q "check-{N}-${expected}-{YYYY-MM-DD}" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md uses correct log slug '${expected}'"
-  else
-    fail "skills/$skill/SKILL.md has wrong log slug (expected '${expected}')"
-  fi
-}
-verify_slug critique critique
-verify_slug critique-plan plan-critique
-verify_slug second-opinion second-opinion
-verify_slug pre pre-task
+if grep -q "check-{N}-critique-{YYYY-MM-DD}" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md uses correct log slug 'critique'"
+else
+  fail "skills/critique/SKILL.md has wrong log slug"
+fi
 
-# All skills use the same timestamp format in log filenames
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "{YYYY-MM-DD}-{HHMM}.md" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md uses {YYYY-MM-DD}-{HHMM}.md timestamp format"
-  else
-    fail "skills/$skill/SKILL.md uses inconsistent timestamp format"
-  fi
-done
+if grep -q "{YYYY-MM-DD}-{HHMM}.md" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md uses {YYYY-MM-DD}-{HHMM}.md timestamp format"
+else
+  fail "skills/critique/SKILL.md uses inconsistent timestamp format"
+fi
 
-# All skills instruct to create the logs/ directory
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "Create the \`logs/\` directory if it doesn't exist" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has logs/ directory creation instruction"
-  else
-    fail "skills/$skill/SKILL.md missing logs/ directory creation instruction"
-  fi
-done
+if grep -q 'Create the .* directory if' "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has logs/ directory creation instruction"
+else
+  fail "skills/critique/SKILL.md missing logs/ directory creation instruction"
+fi
+echo ""
+
+# ---------------------------------------------------------------------------
+# 12. Auto-detection
+# ---------------------------------------------------------------------------
+echo "Auto-detection"
+
+if grep -qi "Target Detection" "skills/critique/SKILL.md" || grep -qi "auto-detect\|Determine whether" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has target auto-detection"
+else
+  fail "skills/critique/SKILL.md missing target auto-detection"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------

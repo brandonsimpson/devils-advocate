@@ -63,7 +63,7 @@ Step 4: Print suggestion
   Write JSON to stdout with additionalContext field
   additionalContext is injected into Claude's conversation context
   Claude sees the suggestion and relays it to the user
-  Suggests running /devils-advocate:critique-plan <path>
+  Suggests running /devils-advocate:critique
 
 Step 5: Safe exit
   All code wrapped in try/catch — errors never propagate

@@ -19,7 +19,7 @@ echo "Devils Advocate — Consistency Checks"
 echo "═══════════════════════════════════════"
 echo ""
 
-# 1. hooks.json is valid JSON
+# 1. JSON validity
 echo "JSON validity"
 if node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'))" 2>/dev/null; then
   pass "hooks/hooks.json is valid JSON"
@@ -51,62 +51,49 @@ else
 fi
 echo ""
 
-# 3. All scoring skills have calibration anchors
-echo "Calibration anchors"
-for skill in critique critique-plan second-opinion; do
-  if grep -q "Calibration anchors" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has calibration anchors"
-  else
-    fail "skills/$skill/SKILL.md missing calibration anchors"
-  fi
-done
+# 3. Binary criteria present in critique skill
+echo "Binary criteria"
+if grep -q "Code Criteria" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Code Criteria section"
+else
+  fail "skills/critique/SKILL.md missing Code Criteria section"
+fi
+
+if grep -q "Plan Criteria" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Plan Criteria section"
+else
+  fail "skills/critique/SKILL.md missing Plan Criteria section"
+fi
 echo ""
 
-# 4. All scoring skills have Unverified section
+# 4. Unverified section
 echo "Unverified section"
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "Unverified" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Unverified section"
-  else
-    fail "skills/$skill/SKILL.md missing Unverified section"
-  fi
-done
+if grep -q "Unverified" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Unverified section"
+else
+  fail "skills/critique/SKILL.md missing Unverified section"
+fi
 echo ""
 
-# 5. All scoring skills reference session.md
+# 5. Session log reference
 echo "Session log reference"
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "session\.md" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md references session.md"
-  else
-    fail "skills/$skill/SKILL.md missing session.md reference"
-  fi
-done
+if grep -q "session\.md" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md references session.md"
+else
+  fail "skills/critique/SKILL.md missing session.md reference"
+fi
 echo ""
 
-# 6. All scoring skills have reinvention risk
-echo "Reinvention risk"
-for skill in critique critique-plan second-opinion pre; do
-  if grep -qi "reinvention" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has reinvention risk"
-  else
-    fail "skills/$skill/SKILL.md missing reinvention risk"
-  fi
-done
+# 6. Context gate
+echo "Context gate"
+if grep -q "Context Gate" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Context Gate"
+else
+  fail "skills/critique/SKILL.md missing Context Gate"
+fi
 echo ""
 
-# 7. Context gates
-echo "Context gates"
-for skill in critique critique-plan pre second-opinion; do
-  if grep -q "Context Gate" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Context Gate"
-  else
-    fail "skills/$skill/SKILL.md missing Context Gate"
-  fi
-done
-echo ""
-
-# 8. Frontmatter description length (warn if > 120 chars)
+# 7. Frontmatter description length (warn if > 120 chars)
 echo "Description lengths"
 MAX_LEN=120
 for skill_dir in skills/*/; do
@@ -121,101 +108,96 @@ for skill_dir in skills/*/; do
 done
 echo ""
 
-# 9. Scope-bounded critique in post-work skills
+# 8. Scope-bounded critique
 echo "Scope-bounded critique"
-for skill in critique critique-plan second-opinion; do
-  if grep -q "Scope-Bounded Critique" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Scope-Bounded Critique"
-  else
-    fail "skills/$skill/SKILL.md missing Scope-Bounded Critique"
-  fi
-done
-echo ""
-
-# 10. Overconfidence check in post-task critique skills
-echo "Overconfidence check"
-for skill in critique second-opinion; do
-  if grep -q "Overconfidence check" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Overconfidence check"
-  else
-    fail "skills/$skill/SKILL.md missing Overconfidence check"
-  fi
-done
-echo ""
-
-# 11. Skeptical Take in post-task critique output formats
-echo "Skeptical Take"
-for skill in critique second-opinion; do
-  if grep -q "Skeptical Take" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Skeptical Take"
-  else
-    fail "skills/$skill/SKILL.md missing Skeptical Take"
-  fi
-done
-echo ""
-
-# 12. Strengths section in post-task critique output formats
-echo "Strengths section"
-for skill in critique second-opinion; do
-  if grep -q "^Strengths:" "skills/$skill/SKILL.md" || grep -q "^• \[strength" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Strengths section"
-  else
-    fail "skills/$skill/SKILL.md missing Strengths section"
-  fi
-done
-echo ""
-
-# 13. Directory creation instruction in session log write steps
-echo "Directory creation instruction"
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "Create the directory and file if they don't exist" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has directory creation instruction"
-  else
-    fail "skills/$skill/SKILL.md missing directory creation instruction"
-  fi
-done
-echo ""
-
-# 14. Calibration anchors in pre skill
-echo "Pre skill calibration"
-if grep -q "Calibration anchors" "skills/pre/SKILL.md"; then
-  pass "skills/pre/SKILL.md has calibration anchors"
+if grep -q "Scope-Bounded Critique" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Scope-Bounded Critique"
 else
-  fail "skills/pre/SKILL.md missing calibration anchors"
+  fail "skills/critique/SKILL.md missing Scope-Bounded Critique"
 fi
 echo ""
 
-# 15. Weaknesses section in post-task critique output formats
-echo "Weaknesses section"
-for skill in critique second-opinion; do
-  if grep -q "^Weaknesses:" "skills/$skill/SKILL.md" || grep -q "^• \[weakness" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has Weaknesses section"
-  else
-    fail "skills/$skill/SKILL.md missing Weaknesses section"
-  fi
-done
+# 9. Evidence requirement (file:line)
+echo "Evidence requirement"
+if grep -q 'file:line' "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md requires file:line evidence"
+else
+  fail "skills/critique/SKILL.md missing file:line evidence requirement"
+fi
 echo ""
 
-# 16. Existing patterns in critique and second-opinion
-echo "Existing patterns detection"
-for skill in critique second-opinion; do
-  if grep -qi "Existing patterns" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has existing patterns detection"
-  else
-    fail "skills/$skill/SKILL.md missing existing patterns detection"
-  fi
-done
-echo ""
-
-# 17. Individual log file instruction in scoring skills
+# 10. Individual log file instruction
 echo "Individual log files"
-for skill in critique critique-plan second-opinion pre; do
-  if grep -q "devils-advocate/logs/check-" "skills/$skill/SKILL.md"; then
-    pass "skills/$skill/SKILL.md has individual log file instruction"
+if grep -q "devils-advocate/logs/check-" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has individual log file instruction"
+else
+  fail "skills/critique/SKILL.md missing individual log file instruction"
+fi
+echo ""
+
+# 11. Directory creation instruction
+echo "Directory creation instruction"
+if grep -q "Create the.*directory.*if" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has directory creation instruction"
+else
+  fail "skills/critique/SKILL.md missing directory creation instruction"
+fi
+echo ""
+
+# 12. Standards discovery
+echo "Standards discovery"
+if grep -q "CLAUDE.md" "skills/critique/SKILL.md" && grep -q "AGENTS.md" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md checks for CLAUDE.md and AGENTS.md"
+else
+  fail "skills/critique/SKILL.md missing CLAUDE.md/AGENTS.md check"
+fi
+
+if grep -qi "ADR" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md searches for ADR files"
+else
+  fail "skills/critique/SKILL.md missing ADR search"
+fi
+echo ""
+
+# 13. No deprecated skills exist
+echo "Deprecated skills removed"
+for skill in pre second-opinion critique-plan; do
+  if [ -d "skills/$skill" ]; then
+    fail "skills/$skill/ still exists (should be deleted)"
   else
-    fail "skills/$skill/SKILL.md missing individual log file instruction"
+    pass "skills/$skill/ correctly removed"
   fi
 done
+echo ""
+
+# 14. Binary output format
+echo "Binary output format"
+if grep -q "PASS" "skills/critique/SKILL.md" && grep -q "FAIL" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md uses PASS/FAIL binary format"
+else
+  fail "skills/critique/SKILL.md missing PASS/FAIL format"
+fi
+
+if grep -q "Fix:" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md requires Fix: with each FAIL"
+else
+  fail "skills/critique/SKILL.md missing Fix: requirement"
+fi
+echo ""
+
+# 15. No percentage scoring remnants
+echo "No percentage scoring"
+if grep -q "Calibration anchors" "skills/critique/SKILL.md"; then
+  fail "skills/critique/SKILL.md still has calibration anchors (should be removed)"
+else
+  pass "skills/critique/SKILL.md has no calibration anchors"
+fi
+
+if grep -q "(average + lowest) / 2" "skills/critique/SKILL.md"; then
+  fail "skills/critique/SKILL.md still has percentage scoring formula"
+else
+  pass "skills/critique/SKILL.md has no percentage scoring formula"
+fi
 echo ""
 
 # Summary
