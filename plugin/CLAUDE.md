@@ -32,6 +32,7 @@ The plugin follows the Claude Code plugin structure:
 - **Scope-bounded critique** — The critique skill only evaluates what was requested, never penalizes for out-of-scope features. If a criterion doesn't apply, it's marked PASS with a note.
 - **Standards discovery** — The critique skill reads `CLAUDE.md`, `AGENTS.md`, and searches for ADR files. Standards violations cause relevant criteria to FAIL.
 - **Existing patterns detection** — In code mode, the critique skill greps for existing utilities/helpers/conventions that the critiqued code might be duplicating.
+- **Independence gate** — When critiquing your own work (same conversation), the critique skill dispatches an independent subagent to avoid author bias. Falls back to inline critique with a bias warning if the Agent tool is unavailable.
 - **Context gate** — The critique skill refuses to produce results if it lacks sufficient context. This prevents false-confidence scoring.
 - **Evidence requirement** — Every FAIL must cite `file:line` references. Results without evidence are invalid.
 - **Unverified section** — Mandatory in every critique. Must list at least one thing not checked.

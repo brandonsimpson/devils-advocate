@@ -479,8 +479,29 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# 9. Context gate refusal format
+# 9. Independence gate and context gate
 # ---------------------------------------------------------------------------
+echo "Independence gate"
+
+if grep -q "Independence Gate" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Independence Gate"
+else
+  fail "skills/critique/SKILL.md missing Independence Gate"
+fi
+
+if grep -q "subagent" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has subagent dispatch instruction"
+else
+  fail "skills/critique/SKILL.md missing subagent dispatch instruction"
+fi
+
+if grep -q "author bias" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md explains author bias rationale"
+else
+  fail "skills/critique/SKILL.md missing author bias rationale"
+fi
+echo ""
+
 echo "Context gate refusal format"
 
 if grep -q "CONTEXT INSUFFICIENT" "skills/critique/SKILL.md"; then

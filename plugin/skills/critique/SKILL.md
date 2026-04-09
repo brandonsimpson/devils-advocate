@@ -20,9 +20,36 @@ Determine whether you are critiquing **code** or a **plan** based on conversatio
 
 ## Process
 
-### Step 0: Context Gate
+### Step 0: Independence Gate
 
-Before critiquing, verify you have sufficient context:
+**If you wrote or contributed to the target being critiqued (same conversation), you MUST dispatch an independent subagent.** Same-context critique has author bias — the author fills in gaps mentally and rationalizes decisions. Independent critique only sees the artifact and codebase.
+
+**Dispatch pattern:** Before dispatching, replace `TARGET_PATH` with the actual file path or description of changes, and expand the criteria placeholder with the appropriate criteria block from Step 4 (code or plan).
+
+```
+Agent({
+  description: "Independent DA critique",
+  model: "opus",
+  prompt: `You are a devil's advocate reviewer. Perform an adversarial binary critique of: TARGET_PATH
+
+Read CLAUDE.md first for project conventions. Then read the target file. Then verify all claims against the actual codebase using Read, Grep, Glob, and Bash (npm list, tsc --noEmit, etc.).
+
+CRITERIA_BLOCK
+
+For each criterion: PASS with brief evidence, or FAIL with file:line and a Fix: suggestion.
+Write results to .devils-advocate/logs/check-N-critique-YYYY-MM-DD-HHMM.md
+Write session entry to .devils-advocate/session.md
+Run: touch .devils-advocate/.commit-reviewed`
+})
+```
+
+**When to run inline (without subagent):** Only when critiquing code or plans you did NOT write in this conversation (e.g., reviewing someone else's PR, auditing existing code).
+
+**Fallback:** If the Agent tool is unavailable or dispatch fails, proceed with inline critique but prepend a warning: `WARNING: Self-critique — author bias may be present.`
+
+### Step 0b: Context Gate
+
+Before critiquing (whether inline or via subagent), verify you have sufficient context:
 1. **Have you read the relevant files?** — If you haven't used Read/Grep to examine the actual code or plan, STOP.
 2. **Do you understand the task?** — If the task was vague or you can't restate it precisely, STOP.
 3. **Do you know the project structure?** — If you haven't explored the repo enough to understand how components connect, STOP.

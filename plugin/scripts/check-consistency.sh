@@ -84,7 +84,15 @@ else
 fi
 echo ""
 
-# 6. Context gate
+# 6. Independence gate and context gate
+echo "Independence gate"
+if grep -q "Independence Gate" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Independence Gate"
+else
+  fail "skills/critique/SKILL.md missing Independence Gate"
+fi
+
+echo ""
 echo "Context gate"
 if grep -q "Context Gate" "skills/critique/SKILL.md"; then
   pass "skills/critique/SKILL.md has Context Gate"

@@ -59,6 +59,8 @@ Or single session: `claude --plugin-dir ~/.claude/plugins/devils-advocate`
 
 Binary pass/fail critique across every dimension that matters. Auto-detects whether you're reviewing code or a plan document.
 
+**Independence gate:** When critiquing work Claude wrote in the same conversation, it automatically dispatches an independent subagent to avoid author bias — the reviewer never sees the author's reasoning, only the artifact and codebase.
+
 **Code critique (17 criteria, 7 dimensions):**
 
 - **Correctness** — Tests pass? Logic correct? Edge cases handled?
