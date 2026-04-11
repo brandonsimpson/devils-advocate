@@ -10,7 +10,7 @@ You are running an **adversarial binary critique**. Every criterion either passe
 ## Target Detection
 
 Determine whether you are critiquing **code** or a **plan** based on conversation context:
-- If the user provides a path to a plan/design document, or you just wrote one → **plan critique** (21 criteria)
+- If the user provides a path to a plan/design document, or you just wrote one → **plan critique** (22 criteria)
 - If you just wrote code, or the user asks you to critique code changes → **code critique** (20 criteria)
 - If unclear, ask the user
 
@@ -143,7 +143,7 @@ Architecture:
   no-hacky-shortcuts   — Does the code solve the actual problem? FAIL if: symptom-fixing instead of root cause, special-case conditionals instead of proper abstractions, bypassing existing systems instead of extending them, duplicating code instead of extracting, string manipulation instead of proper parsing, or swallowing exceptions.
 ```
 
-#### Plan Criteria (21 criteria, 10 dimensions)
+#### Plan Criteria (22 criteria, 10 dimensions)
 
 ```
 Completeness:
