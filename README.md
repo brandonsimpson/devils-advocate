@@ -18,6 +18,8 @@ Every criterion demands `file:line` evidence and a fix suggestion — no hand-wa
 
 It'll flag you for reinventing bcrypt, missing authorization checks, duplicating a helper that already exists three directories away, writing plans where step 4 depends on step 7, N+1 queries in hot paths, and shipping without a rollback strategy. It knows when you're hand-rolling auth instead of using a battle-tested library, and it won't let you forget that "works on my machine" isn't a testing strategy.
 
+New in v3.2: it catches **architectural drift** — when Claude bypasses an established API layer to hit a database directly, adds special-case conditionals instead of proper abstractions, or papers over a root cause with a band-aid fix. It mines your codebase for dominant patterns and enforces them, even if they're not documented.
+
 It works on both code and plans — auto-detecting which criteria set to use based on what you're reviewing.
 
 ## Install
@@ -61,16 +63,17 @@ Binary pass/fail critique across every dimension that matters. Auto-detects whet
 
 **Independence gate:** When critiquing work Claude wrote in the same conversation, it automatically dispatches an independent subagent to avoid author bias — the reviewer never sees the author's reasoning, only the artifact and codebase.
 
-**Code critique (17 criteria, 7 dimensions):**
+**Code critique (20 criteria, 8 dimensions):**
 
 - **Correctness** — Tests pass? Logic correct? Edge cases handled?
 - **Security** — No hardcoded secrets, input validated, no injection vectors, auth enforced?
-- **Quality** — No dead code, no placeholders, errors handled properly?
+- **Quality** — No dead code, no placeholders, errors handled properly, no code smell?
 - **Performance** — No N+1 queries, no O(n^2) in hot paths?
 - **Consistency** — Types match, naming follows conventions, patterns followed?
 - **Integration** — Imports resolve, tests exist, no regressions?
+- **Architecture** — Established boundaries respected, no hacky shortcuts?
 
-**Plan critique (19 criteria, 9 dimensions):**
+**Plan critique (22 criteria, 10 dimensions):**
 
 - **Completeness** — Requirements covered, no placeholders, edge cases addressed?
 - **Correctness** — APIs verified against docs, patterns match library usage?
@@ -81,6 +84,7 @@ Binary pass/fail critique across every dimension that matters. Auto-detects whet
 - **Dependencies** — Correct task ordering, all deps available?
 - **Resilience** — Rollback plan exists, performance considered?
 - **Integration** — Import paths valid, follows project patterns?
+- **Architecture** — Established boundaries respected, no hacky shortcuts?
 
 Every FAIL comes with a `Fix:` suggestion. Example output:
 
@@ -106,7 +110,7 @@ Target: code changes for webhook handler
 
   ...
 
-Result: 12/17 PASS — 5 criteria need fixing
+Result: 15/20 PASS — 5 criteria need fixing
 
 Failing criteria with fixes:
 1. edge-cases: Add early return for empty payloads at webhook.ts:45
@@ -126,6 +130,7 @@ The critique skill automatically discovers your project's documented standards b
 - **`CLAUDE.md` / `AGENTS.md`** — Your conventions, required patterns, and constraints. Standards violations cause relevant criteria to FAIL.
 - **ADR files** — Searched in `docs/adr/`, `docs/decisions/`, `adr/`, `decisions/`, `doc/architecture/decisions/`, and `**/ADR-*.md`
 - **Existing patterns** — Utilities, helpers, and conventions already in your codebase that the critiqued code might be duplicating.
+- **Architectural boundaries** — Barrel exports, API client modules, repository patterns, and service layers that indicate intentional boundaries. If 5+ instances in your codebase do something one way, that's the established pattern — violations fail even if undocumented.
 
 ## Session Log & Hooks
 
