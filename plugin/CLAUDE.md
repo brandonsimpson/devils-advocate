@@ -13,7 +13,7 @@ The plugin follows the Claude Code plugin structure:
 - **`plugin/.claude-plugin/plugin.json`** — Plugin metadata (name, version, description). Version here is the source of truth.
 - **`.claude-plugin/marketplace.json`** — Marketplace registry entry (lives at repo root, not inside `plugin/`). Source points to `./plugin`. Version must stay in sync with `plugin.json`.
 - **`skills/`** — Each subdirectory contains a `SKILL.md` file that defines a slash command:
-  - `critique/` → `/devils-advocate:critique` — Binary pass/fail critique of code or plan documents. Auto-detects target type. 17 criteria for code (7 dimensions), 19 criteria for plans (9 dimensions).
+  - `critique/` → `/devils-advocate:critique` — Binary pass/fail critique of code or plan documents. Auto-detects target type. 20 criteria for code (8 dimensions), 22 criteria for plans (10 dimensions).
   - `log/` → `/devils-advocate:log` — Display session history
 - **`hooks/HOOKS.md`** — Companion documentation explaining the inline hook logic step-by-step (hooks are `node -e` one-liners due to plugin path constraints).
 - **`hooks/hooks.json`** — Registers two hooks:
@@ -24,7 +24,7 @@ The plugin follows the Claude Code plugin structure:
 ## Key Conventions
 
 - **Binary evaluation** — All critiques use binary pass/fail per criterion. No percentage scores. Each criterion either PASS or FAIL. Every FAIL must cite `file:line` evidence and include a `Fix:` suggestion.
-- **Two criteria sets** — Code critiques use 17 criteria across 7 dimensions (Correctness, Security, Quality, Performance, Consistency, Integration). Plan critiques use 19 criteria across 9 dimensions (Completeness, Correctness, Testability, Security, Consistency, Simplicity, Dependencies, Resilience, Integration).
+- **Two criteria sets** — Code critiques use 20 criteria across 8 dimensions (Correctness, Security, Quality, Performance, Consistency, Integration, Architecture). Plan critiques use 22 criteria across 10 dimensions (Completeness, Correctness, Testability, Security, Consistency, Simplicity, Dependencies, Resilience, Integration, Architecture).
 - **Auto-detection** — The critique skill determines whether it's reviewing code or a plan based on conversation context. No explicit mode flag needed.
 - **SKILL.md frontmatter** — Each skill has YAML frontmatter with `name` and `description`. The `description` field must be short enough to avoid `ENAMETOOLONG` errors during plugin installation (this was a real bug — see commit `b381119`).
 - **Session log** — The critique skill appends entries to `.devils-advocate/session.md` in the user's project (not this repo). Entries include git SHA, timestamp, check number, and pass count. The log skill only reads, never writes.
@@ -32,6 +32,7 @@ The plugin follows the Claude Code plugin structure:
 - **Scope-bounded critique** — The critique skill only evaluates what was requested, never penalizes for out-of-scope features. If a criterion doesn't apply, it's marked PASS with a note.
 - **Standards discovery** — The critique skill reads `CLAUDE.md`, `AGENTS.md`, and searches for ADR files. Standards violations cause relevant criteria to FAIL.
 - **Existing patterns detection** — In code mode, the critique skill greps for existing utilities/helpers/conventions that the critiqued code might be duplicating.
+- **Architecture enforcement** — The critique skill checks for architectural boundary violations (service layers, API boundaries, module interfaces) and hacky shortcuts (symptom-fixing, special-case conditionals, bypassing existing systems). Pattern discovery is code-enforced: if 5+ instances in the codebase do something one way, that's the established pattern regardless of documentation.
 - **Independence gate** — When critiquing your own work (same conversation), the critique skill dispatches an independent subagent to avoid author bias. Falls back to inline critique with a bias warning if the Agent tool is unavailable.
 - **Context gate** — The critique skill refuses to produce results if it lacks sufficient context. This prevents false-confidence scoring.
 - **Evidence requirement** — Every FAIL must cite `file:line` references. Results without evidence are invalid.
