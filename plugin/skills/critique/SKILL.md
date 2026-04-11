@@ -10,8 +10,8 @@ You are running an **adversarial binary critique**. Every criterion either passe
 ## Target Detection
 
 Determine whether you are critiquing **code** or a **plan** based on conversation context:
-- If the user provides a path to a plan/design document, or you just wrote one → **plan critique** (19 criteria)
-- If you just wrote code, or the user asks you to critique code changes → **code critique** (17 criteria)
+- If the user provides a path to a plan/design document, or you just wrote one → **plan critique** (21 criteria)
+- If you just wrote code, or the user asks you to critique code changes → **code critique** (20 criteria)
 - If unclear, ask the user
 
 ## Scope-Bounded Critique
@@ -77,6 +77,9 @@ Search for documented standards, architectural decisions, and existing patterns:
 1. **Standards files** — Use Read to check for `CLAUDE.md` and `AGENTS.md` in the project root. Note any conventions, required patterns, or constraints they define.
 2. **ADR files** — Use Glob to search for architectural decision records: `docs/adr/*.md`, `docs/decisions/*.md`, `adr/*.md`, `decisions/*.md`, `doc/architecture/decisions/*.md`, `**/ADR-*.md`. Read any that exist.
 3. **Existing patterns** *(code mode only)* — Use Grep to search the codebase for utilities, helpers, or conventions similar to the code being critiqued. Look for patterns the work might be duplicating.
+4. **Architectural domain** — Identify what layer, module, or service the change touches. Note which boundaries exist around it (API layers, service interfaces, module exports).
+5. **Dominant patterns** — Grep for how similar operations are done elsewhere in the codebase. Find 3-5 examples of the same category of operation (DB access, API calls, event handling, etc.) and note the dominant pattern. If 5+ instances do it one way, that's the established pattern — violations FAIL even if undocumented.
+6. **Boundary markers** — Look for barrel exports (`index.ts`/`index.js`), API client modules, repository patterns, service layers, or interface files that indicate intentional architectural boundaries.
 
 **Important:** If standards files exist but contain no actionable conventions or constraints, treat it as if no standards were found.
 
@@ -102,7 +105,7 @@ Run every criterion in the appropriate set. For each criterion:
 
 Every FAIL must include a `Fix:` — a fail without a fix is useless.
 
-#### Code Criteria (17 criteria, 7 dimensions)
+#### Code Criteria (20 criteria, 8 dimensions)
 
 ```
 Correctness:
@@ -120,6 +123,7 @@ Quality:
   no-dead-code      — No unused imports, unreachable code, commented-out blocks?
   no-placeholders   — No TODO/FIXME/stub that should be implemented?
   error-handling    — Errors caught and handled (not silently swallowed)?
+  no-code-smell     — No god classes, feature envy, leaky abstractions, inappropriate intimacy, or data clumps?
 
 Performance:
   no-obvious-perf   — No N+1 queries, O(n²) in hot paths, or unnecessary allocations?
@@ -133,9 +137,13 @@ Integration:
   imports-correct   — All imports resolve to real files/packages?
   tests-exist       — New code has corresponding tests?
   no-regressions    — Existing tests still pass?
+
+Architecture:
+  boundaries-respected — Does the code respect established architectural boundaries (service layers, API boundaries, module interfaces)? Check: grep for how similar operations are done elsewhere. If a dominant pattern exists and this code bypasses it, FAIL.
+  no-hacky-shortcuts   — Does the code solve the actual problem? FAIL if: symptom-fixing instead of root cause, special-case conditionals instead of proper abstractions, bypassing existing systems instead of extending them, duplicating code instead of extracting, string manipulation instead of proper parsing, or swallowing exceptions.
 ```
 
-#### Plan Criteria (19 criteria, 9 dimensions)
+#### Plan Criteria (21 criteria, 10 dimensions)
 
 ```
 Completeness:
@@ -175,6 +183,10 @@ Resilience:
 Integration:
   imports-correct    — Do import paths reference files/packages that actually exist?
   follows-patterns   — Does the plan follow the project's established patterns?
+
+Architecture:
+  boundaries-respected — Does the plan respect established architectural boundaries? Check: grep for how similar operations are done in the codebase. If the plan proposes bypassing a dominant pattern (e.g., direct DB access when an API layer exists), FAIL.
+  no-hacky-shortcuts   — Does the plan solve the actual problem? FAIL if: band-aid fixes, workarounds that skip root cause, special-case handling instead of proper abstractions, or bypassing existing systems instead of extending them.
 ```
 
 ### Step 5: Write the session log entry
@@ -215,9 +227,13 @@ Target: [plan filename or "code changes for <task>"]
     no-injection .... PASS
     auth-enforced ... PASS
 
+  Architecture:
+    boundaries-respected .. PASS
+    no-hacky-shortcuts .... PASS
+
   [... remaining dimensions ...]
 
-Result: 14/17 PASS — 3 criteria need fixing
+Result: 17/20 PASS — 3 criteria need fixing
 
 Failing criteria with fixes:
 1. logic-correct: [specific fix with file:line]
