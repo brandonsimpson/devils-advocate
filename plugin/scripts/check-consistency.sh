@@ -66,6 +66,38 @@ else
 fi
 echo ""
 
+# Count actual code criteria
+CODE_COUNT=$(sed -n '/Code Criteria/,/Plan Criteria/{ /^ *[a-z].*—/p; }' "skills/critique/SKILL.md" | wc -l | tr -d ' ')
+if [ "$CODE_COUNT" -eq 20 ]; then
+  pass "code criteria count is 20"
+else
+  fail "code criteria count is $CODE_COUNT (expected 20)"
+fi
+
+# Count actual plan criteria
+PLAN_COUNT=$(sed -n '/Plan Criteria/,/Step 5/{ /^ *[a-z].*—/p; }' "skills/critique/SKILL.md" | wc -l | tr -d ' ')
+if [ "$PLAN_COUNT" -eq 22 ]; then
+  pass "plan criteria count is 22"
+else
+  fail "plan criteria count is $PLAN_COUNT (expected 22)"
+fi
+
+# Architecture dimension present in both
+if grep -q "Architecture:" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Architecture dimension"
+else
+  fail "skills/critique/SKILL.md missing Architecture dimension"
+fi
+
+# New criteria names present
+for criterion in boundaries-respected no-hacky-shortcuts no-code-smell; do
+  if grep -q "$criterion" "skills/critique/SKILL.md"; then
+    pass "criterion present: $criterion"
+  else
+    fail "criterion missing: $criterion"
+  fi
+done
+
 # 4. Unverified section
 echo "Unverified section"
 if grep -q "Unverified" "skills/critique/SKILL.md"; then
@@ -164,6 +196,28 @@ if grep -qi "ADR" "skills/critique/SKILL.md"; then
   pass "skills/critique/SKILL.md searches for ADR files"
 else
   fail "skills/critique/SKILL.md missing ADR search"
+fi
+echo ""
+
+# Enhanced discovery: architectural domain identification
+if grep -q "Architectural domain" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has architectural domain discovery"
+else
+  fail "skills/critique/SKILL.md missing architectural domain discovery"
+fi
+
+# Enhanced discovery: dominant pattern detection
+if grep -q "Dominant patterns" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has dominant pattern detection"
+else
+  fail "skills/critique/SKILL.md missing dominant pattern detection"
+fi
+
+# Enhanced discovery: boundary markers
+if grep -q "Boundary markers" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has boundary marker detection"
+else
+  fail "skills/critique/SKILL.md missing boundary marker detection"
 fi
 echo ""
 
