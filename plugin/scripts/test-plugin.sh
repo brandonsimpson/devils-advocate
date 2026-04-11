@@ -105,9 +105,9 @@ echo ""
 # ---------------------------------------------------------------------------
 # 3. Binary criteria completeness
 # ---------------------------------------------------------------------------
-echo "Binary criteria completeness — Code (17 criteria)"
+echo "Binary criteria completeness — Code (20 criteria)"
 
-CODE_CRITERIA="tests-pass logic-correct edge-cases no-secrets input-validated no-injection auth-enforced no-dead-code no-placeholders error-handling no-obvious-perf types-consistent naming-matches patterns-followed imports-correct tests-exist no-regressions"
+CODE_CRITERIA="tests-pass logic-correct edge-cases no-secrets input-validated no-injection auth-enforced no-dead-code no-placeholders error-handling no-code-smell no-obvious-perf types-consistent naming-matches patterns-followed imports-correct tests-exist no-regressions boundaries-respected no-hacky-shortcuts"
 for criterion in $CODE_CRITERIA; do
   if grep -q "$criterion" "skills/critique/SKILL.md"; then
     pass "code criterion: $criterion"
@@ -117,9 +117,9 @@ for criterion in $CODE_CRITERIA; do
 done
 echo ""
 
-echo "Binary criteria completeness — Plan (19 criteria)"
+echo "Binary criteria completeness — Plan (22 criteria)"
 
-PLAN_CRITERIA="req-coverage no-placeholders edge-cases api-verified patterns-correct tests-per-step verification no-secrets input-validated auth-designed types-consistent naming-matches no-overengineering no-reinvention correct-order deps-available rollback-plan perf-considered imports-correct follows-patterns"
+PLAN_CRITERIA="req-coverage no-placeholders edge-cases api-verified patterns-correct tests-per-step verification no-secrets input-validated auth-designed types-consistent naming-matches no-overengineering no-reinvention correct-order deps-available rollback-plan perf-considered imports-correct follows-patterns boundaries-respected no-hacky-shortcuts"
 for criterion in $PLAN_CRITERIA; do
   if grep -q "$criterion" "skills/critique/SKILL.md"; then
     pass "plan criterion: $criterion"
@@ -464,6 +464,25 @@ if grep -qi "ADR" "skills/critique/SKILL.md"; then
 else
   fail "skills/critique/SKILL.md missing ADR search"
 fi
+
+# Enhanced discovery
+if grep -q "Architectural domain" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has architectural domain discovery step"
+else
+  fail "skills/critique/SKILL.md missing architectural domain discovery step"
+fi
+
+if grep -q "Dominant patterns" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has dominant pattern detection step"
+else
+  fail "skills/critique/SKILL.md missing dominant pattern detection step"
+fi
+
+if grep -q "Boundary markers" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has boundary marker detection step"
+else
+  fail "skills/critique/SKILL.md missing boundary marker detection step"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -586,6 +605,26 @@ if grep -qi "Target Detection" "skills/critique/SKILL.md" || grep -qi "auto-dete
   pass "skills/critique/SKILL.md has target auto-detection"
 else
   fail "skills/critique/SKILL.md missing target auto-detection"
+fi
+echo ""
+
+# ---------------------------------------------------------------------------
+# 13. Architecture dimension
+# ---------------------------------------------------------------------------
+echo "Architecture dimension"
+
+if grep -q "Architecture:" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has Architecture dimension"
+else
+  fail "skills/critique/SKILL.md missing Architecture dimension"
+fi
+
+# Architecture dimension appears in both code and plan criteria
+ARCH_COUNT=$(grep -c "^Architecture:" "skills/critique/SKILL.md" || true)
+if [ "$ARCH_COUNT" -ge 2 ]; then
+  pass "Architecture dimension present in both code and plan criteria"
+else
+  fail "Architecture dimension only appears $ARCH_COUNT time(s), expected 2+"
 fi
 echo ""
 
