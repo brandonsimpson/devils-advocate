@@ -60,7 +60,9 @@ Step 3: Check if path matches plan file patterns
   Does NOT match: explanation.md, planet.md, src/planner.ts
 
 Step 4: Print suggestion
-  Write JSON to stdout with additionalContext field
+  Write JSON to stdout with hookSpecificOutput.additionalContext
+  (hookEventName: 'PostToolUse' — Claude Code ignores a bare top-level
+  additionalContext field; the nested shape is required)
   additionalContext is injected into Claude's conversation context
   Claude sees the suggestion and relays it to the user
   Suggests running /devils-advocate:critique

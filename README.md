@@ -33,20 +33,20 @@ It works on both code and plans — auto-detecting which criteria set to use bas
 <summary>Manual install</summary>
 
 ```bash
-git clone https://github.com/brandonsimpson/devils-advocate.git ~/.claude/plugins/devils-advocate
+git clone https://github.com/brandonsimpson/devils-advocate.git
 ```
 
-Add to `~/.claude/settings.json`:
+Single session — note the `/plugin` suffix; the plugin lives in the `plugin/` subdirectory, not the repo root:
 
-```json
-{
-  "plugins": [
-    "~/.claude/plugins/devils-advocate"
-  ]
-}
+```bash
+claude --plugin-dir ./devils-advocate/plugin
 ```
 
-Or single session: `claude --plugin-dir ~/.claude/plugins/devils-advocate`
+Permanent — link the plugin into your skills directory and it loads every session as `devils-advocate@skills-dir`:
+
+```bash
+ln -s "$(pwd)/devils-advocate/plugin" ~/.claude/skills/devils-advocate
+```
 
 </details>
 

@@ -6,5 +6,5 @@
     "name": "Brandon Simpson"
   },
   "license": "MIT",
-  "keywords": ["confidence", "scoring", "self-critique", "quality", "devils-advocate"]
+  "keywords": ["self-critique", "code-review", "binary-eval", "quality", "devils-advocate"]
 }

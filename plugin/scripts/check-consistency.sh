@@ -11,9 +11,11 @@ PASS=0
 FAIL=0
 WARN=0
 
-pass() { ((PASS++)); printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
-fail() { ((FAIL++)); printf "  \033[31mFAIL\033[0m  %s\n" "$1"; }
-warn() { ((WARN++)); printf "  \033[33mWARN\033[0m  %s\n" "$1"; }
+# POSIX-safe increments: ((VAR++)) returns exit status 1 when VAR is 0,
+# which kills the script under set -e on bash >= 4.1 (Linux/CI).
+pass() { PASS=$((PASS+1)); printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
+fail() { FAIL=$((FAIL+1)); printf "  \033[31mFAIL\033[0m  %s\n" "$1"; }
+warn() { WARN=$((WARN+1)); printf "  \033[33mWARN\033[0m  %s\n" "$1"; }
 
 echo "Devils Advocate — Consistency Checks"
 echo "═══════════════════════════════════════"

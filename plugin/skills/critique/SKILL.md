@@ -36,7 +36,7 @@ Read CLAUDE.md first for project conventions. Then read the target file. Then ve
 
 CRITERIA_BLOCK
 
-For each criterion: PASS with brief evidence, or FAIL with file:line and a Fix: suggestion.
+For each criterion: think step by step before marking it PASS or FAIL. Then: PASS with brief evidence, or FAIL with file:line and a Fix: suggestion.
 Write results to .devils-advocate/logs/check-N-critique-YYYY-MM-DD-HHMM.md
 Write session entry to .devils-advocate/session.md
 Run: touch .devils-advocate/.commit-reviewed`
@@ -245,6 +245,28 @@ Unverified:
 • [e.g., "I did not run the tests" / "I did not verify this compiles"]
 ```
 
+**When all criteria pass, use this format instead:**
+
+Code critique (20 criteria):
+```
+Result: 20/20 PASS
+
+VERDICT: READY TO SHIP — No blockers. All 20 criteria pass. This work is clean.
+
+Unverified:
+• [what you did NOT verify — MANDATORY, at least one item]
+```
+
+Plan critique (22 criteria):
+```
+Result: 22/22 PASS
+
+VERDICT: APPROVED — No blockers. All 22 criteria pass. This plan is ready to execute.
+
+Unverified:
+• [what you did NOT verify — MANDATORY, at least one item]
+```
+
 ## Rules
 
 - Be genuinely critical, not performatively critical
@@ -252,5 +274,6 @@ Unverified:
 - Every PASS should have brief evidence (not just "looks fine")
 - Anchor your criticisms in specific, concrete concerns — not vague "could be better"
 - If you realize the work has a genuine flaw during assessment, say so clearly
+- **If all criteria pass, emit the appropriate verdict — READY TO SHIP for code, APPROVED for plans. Do not manufacture problems to appear thorough — "do nothing" is a valid and correct outcome.**
 - Never skip the session log write
 - The "Unverified" section is MANDATORY — must list at least one thing. If you claim you verified everything, you're lying.

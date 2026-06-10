@@ -26,11 +26,11 @@ Display the critique history for this session.
 
 ```
 SESSION LOG
-═════���═════════════════════════════════
+═══════════════════════════════════════
 
 [contents of .devils-advocate/session.md]
 
-─────────��─────────────────────────────
+───────────────────────────────────────
 Summary: N checks | Trend: [improving/declining/stable]
 Worst:   Check #X (Y/Z PASS) @ <sha> — [brief note]
 

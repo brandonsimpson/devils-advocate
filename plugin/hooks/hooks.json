@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const fs=require('fs');try{const c=JSON.parse(fs.readFileSync('.devils-advocate/config.json','utf8'));if(c.hooks&&c.hooks['plan-file-detect']===false)process.exit(0)}catch(e){}let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const fp=JSON.parse(d).tool_input.file_path||'';if(/plans?\\/|\\/plan[-_.]|[-_]plan\\./i.test(fp)){process.stdout.write(JSON.stringify({additionalContext:'Devil\\'s Advocate: Plan file written. Run /devils-advocate:critique to review it.'}))}}catch(e){}})\""
+            "command": "node -e \"const fs=require('fs');try{const c=JSON.parse(fs.readFileSync('.devils-advocate/config.json','utf8'));if(c.hooks&&c.hooks['plan-file-detect']===false)process.exit(0)}catch(e){}let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const fp=JSON.parse(d).tool_input.file_path||'';if(/plans?\\/|\\/plan[-_.]|[-_]plan\\./i.test(fp)){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'Devil\\'s Advocate: Plan file written. Run /devils-advocate:critique to review it.'}}))}}catch(e){}})\""
           }
         ]
       }

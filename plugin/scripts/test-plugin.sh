@@ -19,8 +19,10 @@ trap cleanup EXIT
 PASS=0
 FAIL=0
 
-pass() { ((PASS++)); printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
-fail() { ((FAIL++)); printf "  \033[31mFAIL\033[0m  %s\n" "$1"; }
+# POSIX-safe increments: ((VAR++)) returns exit status 1 when VAR is 0,
+# which kills the script under set -e on bash >= 4.1 (Linux/CI).
+pass() { PASS=$((PASS+1)); printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
+fail() { FAIL=$((FAIL+1)); printf "  \033[31mFAIL\033[0m  %s\n" "$1"; }
 
 echo "Devils Advocate — Test Suite"
 echo "═══════════════════════════════════════"
@@ -303,6 +305,18 @@ if echo "$POST_MATCH" | grep -q "Plan file written"; then
   pass "PostToolUse hook fires on plan file path"
 else
   fail "PostToolUse hook silent on plan file path"
+fi
+
+# PostToolUse hook: output is consumable by Claude Code (nested hookSpecificOutput
+# schema — a bare top-level additionalContext field is silently ignored)
+if echo "$POST_MATCH" | node -e "
+let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{
+const h=JSON.parse(d).hookSpecificOutput;
+if(!h||h.hookEventName!=='PostToolUse'||!h.additionalContext)process.exit(1);
+})" 2>/dev/null; then
+  pass "PostToolUse hook output uses hookSpecificOutput schema"
+else
+  fail "PostToolUse hook output not consumable by Claude Code: $POST_MATCH"
 fi
 
 # PostToolUse hook: silent on non-plan file path
@@ -625,6 +639,60 @@ if [ "$ARCH_COUNT" -ge 2 ]; then
   pass "Architecture dimension present in both code and plan criteria"
 else
   fail "Architecture dimension only appears $ARCH_COUNT time(s), expected 2+"
+fi
+echo ""
+
+# ---------------------------------------------------------------------------
+# 14. CoT instruction and verdict quality
+# ---------------------------------------------------------------------------
+echo "CoT instruction and verdict quality"
+
+# Dispatch prompt includes CoT instruction
+if grep -q "think step by step before marking it PASS or FAIL" "skills/critique/SKILL.md"; then
+  pass "dispatch prompt includes CoT instruction"
+else
+  fail "dispatch prompt missing CoT instruction"
+fi
+
+# READY TO SHIP verdict present (code mode)
+if grep -q "READY TO SHIP" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has READY TO SHIP verdict"
+else
+  fail "skills/critique/SKILL.md missing READY TO SHIP verdict"
+fi
+
+# APPROVED verdict present (plan mode)
+if grep -q "VERDICT: APPROVED" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has APPROVED verdict for plans"
+else
+  fail "skills/critique/SKILL.md missing APPROVED verdict for plans"
+fi
+
+# Verdicts are mode-specific (not generic)
+if grep -q "READY TO SHIP.*code" "skills/critique/SKILL.md" || grep -q "Code critique.*READY TO SHIP\|READY TO SHIP.*20 criteria" "skills/critique/SKILL.md"; then
+  pass "READY TO SHIP verdict scoped to code critiques"
+else
+  fail "READY TO SHIP verdict not scoped to code critiques"
+fi
+
+if grep -q "Plan critique.*APPROVED\|APPROVED.*22 criteria" "skills/critique/SKILL.md"; then
+  pass "APPROVED verdict scoped to plan critiques"
+else
+  fail "APPROVED verdict not scoped to plan critiques"
+fi
+
+# Anti-manufacturing rule present
+if grep -q "do not manufacture\|Do not manufacture" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has anti-manufacturing rule"
+else
+  fail "skills/critique/SKILL.md missing anti-manufacturing rule"
+fi
+
+# do-nothing is valid
+if grep -q '"do nothing" is a valid' "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md documents that all-pass is a valid outcome"
+else
+  fail "skills/critique/SKILL.md missing 'do nothing is valid' rule"
 fi
 echo ""
 
