@@ -15,6 +15,12 @@ cd "$(dirname "$0")/.."
 
 SKILL=$(cat skills/critique/SKILL.md)
 TMPDIR_EVAL=$(mktemp -d)
+# Counters must exist before the EXIT trap is installed — under set -u an
+# early abort would otherwise fire cleanup() with them unbound, masking the
+# real error.
+PASS=0
+FAIL=0
+ERRORS=0
 # Keep output on failure for inspection; clean up only on success
 cleanup() { [ "$FAIL" -eq 0 ] && [ "$ERRORS" -eq 0 ] && rm -rf "$TMPDIR_EVAL" || echo "  (raw outputs kept at $TMPDIR_EVAL/)"; }
 trap cleanup EXIT
@@ -73,10 +79,6 @@ echo ""
 # ---------------------------------------------------------------------------
 # Assert helpers — write results to a shared log (parallel-safe via append)
 # ---------------------------------------------------------------------------
-
-PASS=0
-FAIL=0
-ERRORS=0
 
 # POSIX-safe increments: ((VAR++)) returns exit status 1 when VAR is 0,
 # which kills the script under set -e on bash >= 4.1 (Linux/CI).

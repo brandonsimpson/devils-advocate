@@ -17,7 +17,7 @@ All notable changes to the devils-advocate plugin. Format follows [Keep a Change
 - **All-pass verdicts.** A clean critique now ends with an explicit verdict — `READY TO SHIP` for code, `APPROVED` for plans — plus a rule against manufacturing problems to appear thorough.
 - **Chain-of-thought dispatch.** The independence-gate subagent is instructed to think step by step before marking each criterion PASS or FAIL.
 - **LLM eval suite** (`plugin/scripts/eval.sh`): live `claude -p` evals that feed planted fixtures through the critique skill and assert it catches the planted bugs (TODO placeholder, SQL interpolation) without manufacturing failures on a clean plan.
-- Hook-output schema test: `test-plugin.sh` now parses hook stdout and asserts the Claude Code-consumable `hookSpecificOutput` shape (120 checks, was 119).
+- Hook-output schema test: `test-plugin.sh` now parses hook stdout and asserts the Claude Code-consumable `hookSpecificOutput` shape. Test suite now at 120 checks, up from 112 in v3.2.0.
 
 ## [3.2.0] — 2026-04-11
 
