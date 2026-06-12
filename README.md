@@ -18,7 +18,9 @@ Every criterion demands `file:line` evidence and a fix suggestion — no hand-wa
 
 It'll flag you for reinventing bcrypt, missing authorization checks, duplicating a helper that already exists three directories away, writing plans where step 4 depends on step 7, N+1 queries in hot paths, and shipping without a rollback strategy. It knows when you're hand-rolling auth instead of using a battle-tested library, and it won't let you forget that "works on my machine" isn't a testing strategy.
 
-New in v3.2: it catches **architectural drift** — when Claude bypasses an established API layer to hit a database directly, adds special-case conditionals instead of proper abstractions, or papers over a root cause with a band-aid fix. It mines your codebase for dominant patterns and enforces them, even if they're not documented.
+It also catches **architectural drift** — when Claude bypasses an established API layer to hit a database directly, adds special-case conditionals instead of proper abstractions, or papers over a root cause with a band-aid fix. It mines your codebase for dominant patterns and enforces them, even if they're not documented.
+
+And it's honest in both directions: when everything genuinely passes, the verdict is **READY TO SHIP** (code) or **APPROVED** (plans) — it's forbidden from manufacturing problems to appear thorough. "Do nothing" is a valid outcome.
 
 It works on both code and plans — auto-detecting which criteria set to use based on what you're reviewing.
 
@@ -63,7 +65,7 @@ Binary pass/fail critique across every dimension that matters. Auto-detects whet
 
 **Independence gate:** When critiquing work Claude wrote in the same conversation, it automatically dispatches an independent subagent to avoid author bias — the reviewer never sees the author's reasoning, only the artifact and codebase.
 
-**Code critique (20 criteria, 8 dimensions):**
+**Code critique (20 criteria, 7 dimensions):**
 
 - **Correctness** — Tests pass? Logic correct? Edge cases handled?
 - **Security** — No hardcoded secrets, input validated, no injection vectors, auth enforced?
@@ -119,6 +121,21 @@ Failing criteria with fixes:
 4. ...
 ```
 
+When everything passes, it says so plainly instead of inventing nits:
+
+```
+Result: 20/20 PASS
+
+VERDICT: READY TO SHIP — No blockers. All 20 criteria pass. This work is clean.
+
+Unverified:
+• Did not test against the live payment API — recorded fixtures only
+```
+
+Every critique ends with an **Unverified** section — at least one thing it did *not* check. A reviewer that claims it verified everything is lying.
+
+When criteria fail, the critique offers to fix them and re-run. Each critique authorizes exactly one commit, so the cycle closes itself: **fix → re-critique → commit**.
+
 ### `/devils-advocate:log`
 
 Session history — total checks, pass rate trend, and git SHA linking each check to a specific commit. Individual critiques are saved to `.devils-advocate/logs/` for later reference.
@@ -141,6 +158,12 @@ A pre-commit hook nudges you to run a critique before committing — the commit 
 ```json
 {"hooks": {"pre-commit-warning": false, "plan-file-detect": false}}
 ```
+
+## How It's Tested
+
+The critic gets criticized too. The plugin ships with 165 deterministic checks (metadata, criteria completeness, hook behavior, output format) plus 6 live-LLM evals that feed planted-bug fixtures through the critique skill and assert it catches them — without manufacturing failures on clean work. On the eval suite's first run, it failed its own "clean" fixture; the model had found three real flaws in it. The fixtures got fixed, not the thresholds.
+
+Release history: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 

@@ -89,6 +89,34 @@ else
   fail "plan criteria count is $PLAN_COUNT (expected 22)"
 fi
 
+# Count dimension headers (lines like "Correctness:") and verify the prose
+# labels match — "8 dimensions" shipped for two releases while the block had 7
+CODE_DIMS=$(sed -n '/Code Criteria/,/Plan Criteria/{ /^[A-Z][a-zA-Z]*:$/p; }' "skills/critique/SKILL.md" | wc -l | tr -d ' ')
+if [ "$CODE_DIMS" -eq 7 ]; then
+  pass "code dimension count is 7"
+else
+  fail "code dimension count is $CODE_DIMS (expected 7)"
+fi
+
+PLAN_DIMS=$(sed -n '/Plan Criteria/,/Step 5/{ /^[A-Z][a-zA-Z]*:$/p; }' "skills/critique/SKILL.md" | wc -l | tr -d ' ')
+if [ "$PLAN_DIMS" -eq 10 ]; then
+  pass "plan dimension count is 10"
+else
+  fail "plan dimension count is $PLAN_DIMS (expected 10)"
+fi
+
+if grep -q "20 criteria, 7 dimensions" "skills/critique/SKILL.md"; then
+  pass "code criteria header states 7 dimensions"
+else
+  fail "code criteria header does not state 7 dimensions"
+fi
+
+if grep -q "22 criteria, 10 dimensions" "skills/critique/SKILL.md"; then
+  pass "plan criteria header states 10 dimensions"
+else
+  fail "plan criteria header states wrong dimension count"
+fi
+
 # Architecture dimension present in both
 if grep -q "Architecture:" "skills/critique/SKILL.md"; then
   pass "skills/critique/SKILL.md has Architecture dimension"

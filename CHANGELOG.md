@@ -2,6 +2,16 @@
 
 All notable changes to the devils-advocate plugin. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/). Older releases (pre-3.0) predate this file — see git history.
 
+## [3.3.1] — 2026-06-11
+
+### Fixed
+
+- **Code criteria span 7 dimensions, not 8.** The wrong count shipped in README.md, SKILL.md, and plugin/CLAUDE.md since v3.2.0 (whose release notes, ironically, claimed to fix an off-by-one in the *plan* count). Four new consistency checks now count the actual dimension headers in both criteria blocks and verify the prose labels match (consistency suite at 38 checks; 165 deterministic total).
+
+### Changed
+
+- README refresh: architecture-drift detection folded into the main feature prose (was a stale "New in v3.2" callout), added an all-pass verdict example, the fix → re-critique → commit loop, a "How It's Tested" section, and a CHANGELOG link.
+
 ## [3.3.0] — 2026-06-11
 
 ### Changed

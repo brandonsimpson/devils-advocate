@@ -114,7 +114,7 @@ Run every criterion in the appropriate set. For each criterion, think step by st
 
 Every FAIL must include a `Fix:` — a fail without a fix is useless.
 
-#### Code Criteria (20 criteria, 8 dimensions)
+#### Code Criteria (20 criteria, 7 dimensions)
 
 ```
 Correctness:
