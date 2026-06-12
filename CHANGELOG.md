@@ -2,6 +2,12 @@
 
 All notable changes to the devils-advocate plugin. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/). Older releases (pre-3.0) predate this file — see git history.
 
+## [Unreleased]
+
+### Fixed
+
+- v3.3.1's drift guards only covered SKILL.md — README.md and plugin/CLAUDE.md, two of the three files the dimension bug actually shipped in, were unguarded. Found by the plugin's own independent critique (check #15, `tests-exist` FAIL). Four new checks verify the dimension/criteria counts stated in both files against the headers counted from SKILL.md (consistency suite at 42; 169 deterministic total). Guard verified by seeded regression: flipping README back to "8 dimensions" fails the suite.
+
 ## [3.3.1] — 2026-06-11
 
 ### Fixed

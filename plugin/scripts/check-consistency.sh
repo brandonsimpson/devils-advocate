@@ -117,6 +117,27 @@ else
   fail "plan criteria header states wrong dimension count"
 fi
 
+# The counts are stated in prose in README and plugin CLAUDE.md too — the
+# v3.2.0 bug shipped in all three files, so all three get guarded. Compare
+# against the counted headers, not a second hardcoded literal. sort -u puts
+# "10 dimensions" before "7 dimensions" (lexicographic).
+for entry in "../README.md README.md" "CLAUDE.md plugin/CLAUDE.md"; do
+  doc="${entry%% *}"; label="${entry##* }"
+  STATED_DIMS=$(grep -oE "[0-9]+ dimensions" "$doc" | sort -u | tr '\n' ' ')
+  if [ "$STATED_DIMS" = "${PLAN_DIMS} dimensions ${CODE_DIMS} dimensions " ]; then
+    pass "$label states only ${CODE_DIMS}/${PLAN_DIMS} dimensions"
+  else
+    fail "$label dimension prose is '${STATED_DIMS:-none}' (expected only ${CODE_DIMS} and ${PLAN_DIMS})"
+  fi
+  # Presence check only — incidental mentions like "5 criteria need fixing"
+  # in README's example output are legitimate, so uniqueness can't be asserted
+  if grep -q "${CODE_COUNT} criteria" "$doc" && grep -q "${PLAN_COUNT} criteria" "$doc"; then
+    pass "$label states ${CODE_COUNT} and ${PLAN_COUNT} criteria"
+  else
+    fail "$label criteria counts don't match SKILL.md (${CODE_COUNT}/${PLAN_COUNT})"
+  fi
+done
+
 # Architecture dimension present in both
 if grep -q "Architecture:" "skills/critique/SKILL.md"; then
   pass "skills/critique/SKILL.md has Architecture dimension"

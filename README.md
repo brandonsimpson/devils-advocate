@@ -161,7 +161,7 @@ A pre-commit hook nudges you to run a critique before committing — the commit 
 
 ## How It's Tested
 
-The critic gets criticized too. The plugin ships with 165 deterministic checks (metadata, criteria completeness, hook behavior, output format) plus 6 live-LLM evals that feed planted-bug fixtures through the critique skill and assert it catches them — without manufacturing failures on clean work. On the eval suite's first run, it failed its own "clean" fixture; the model had found three real flaws in it. The fixtures got fixed, not the thresholds.
+The critic gets criticized too. The plugin ships with 169 deterministic checks (metadata, criteria completeness, hook behavior, output format) plus 6 live-LLM evals that feed planted-bug fixtures through the critique skill and assert it catches them — without manufacturing failures on clean work. On the eval suite's first run, it failed its own "clean" fixture; the model had found three real flaws in it. The fixtures got fixed, not the thresholds.
 
 Release history: [CHANGELOG.md](CHANGELOG.md)
 
