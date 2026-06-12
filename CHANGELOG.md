@@ -2,6 +2,26 @@
 
 All notable changes to the devils-advocate plugin. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/). Older releases (pre-3.0) predate this file — see git history.
 
+## [3.3.0] — 2026-06-11
+
+### Changed
+
+- **Dispatch template is now self-contained.** The independence-gate subagent prompt includes the full session-log instructions (find the next check number, append-preserving format, SHA + timestamp) — previously the subagent never saw Step 5 and could write a malformed log.
+- **No more hardcoded `model: "opus"` in the dispatch.** The subagent inherits the session's model, so the gate works on every plan and survives model generations.
+- **Verification guidance is stack-agnostic.** "npm list, tsc --noEmit" replaced with "run the project's own test/build/typecheck commands."
+- **Chain-of-thought applies to inline critiques too**, not just dispatched ones.
+
+### Added
+
+- **Fix → re-critique → commit loop.** When criteria FAIL, the critique now ends by offering to fix them and re-run — each critique authorizes exactly one commit, so the loop closes itself.
+- **`--quiet` / `-q` flag** on both shell suites: print only failures and the summary. Saves a few thousand tokens every time an agent runs them.
+- **Code-mode evals.** `eval.sh` now runs 6 evals (3 plan + 3 code): planted TODO stubs, planted SQL concatenation, and clean-work calibration in both modes.
+- 7 new deterministic checks (suite now at 127): dispatch self-containment, no pinned model, fix-recheck rule, code fixtures present, quiet-mode behavior.
+
+### Fixed
+
+- The "clean plan" eval fixture wasn't clean — the eval suite itself caught a broken ESM `package.json` named import, a self-contradicting test snippet, and a missing integration-verification step. The fixture (and its code-mode sibling) now survive an honest 22-criteria review.
+
 ## [3.2.1] — 2026-06-10
 
 ### Fixed
