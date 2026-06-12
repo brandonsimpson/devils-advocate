@@ -29,19 +29,28 @@ Determine whether you are critiquing **code** or a **plan** based on conversatio
 ```
 Agent({
   description: "Independent DA critique",
-  model: "opus",
   prompt: `You are a devil's advocate reviewer. Perform an adversarial binary critique of: TARGET_PATH
 
-Read CLAUDE.md first for project conventions. Then read the target file. Then verify all claims against the actual codebase using Read, Grep, Glob, and Bash (npm list, tsc --noEmit, etc.).
+Read CLAUDE.md first for project conventions. Then read the target. Then verify all claims against the actual codebase using Read, Grep, Glob, and Bash — run the project's own test/build/typecheck commands (discover them from the package manifest, Makefile, or CLAUDE.md; prefer quiet/summary flags where available).
 
 CRITERIA_BLOCK
 
 For each criterion: think step by step before marking it PASS or FAIL. Then: PASS with brief evidence, or FAIL with file:line and a Fix: suggestion.
-Write results to .devils-advocate/logs/check-N-critique-YYYY-MM-DD-HHMM.md
-Write session entry to .devils-advocate/session.md
-Run: touch .devils-advocate/.commit-reviewed`
+
+Then write the logs (paths relative to the project root):
+1. Read .devils-advocate/session.md if it exists. Find the highest check number and use the next one as N. Get the commit SHA via git rev-parse --short HEAD and the timestamp via date +"%Y-%m-%d %H:%M".
+2. Append this entry to .devils-advocate/session.md, preserving all existing content (create the file if missing):
+   ## Check #N — Critique | YYYY-MM-DD HH:MM | <git-sha>
+   - **Result:** X/Y PASS
+   - **Failing:** [comma-separated failing criteria, or "none"]
+   - **Summary:** [1-2 sentence summary]
+3. Write the full formatted critique output to .devils-advocate/logs/check-N-critique-YYYY-MM-DD-HHMM.md, creating the logs/ directory if needed.
+4. Run: touch .devils-advocate/.commit-reviewed
+Return the full formatted critique as your final message.`
 })
 ```
+
+Do not pin a specific model in the dispatch — let the subagent inherit the session's model.
 
 **When to run inline (without subagent):** Only when critiquing code or plans you did NOT write in this conversation (e.g., reviewing someone else's PR, auditing existing code).
 
@@ -99,7 +108,7 @@ Before evaluating, collect concrete evidence:
 
 ### Step 4: Evaluate against criteria
 
-Run every criterion in the appropriate set. For each criterion:
+Run every criterion in the appropriate set. For each criterion, think step by step before marking it PASS or FAIL — this applies to inline critiques exactly as it does to dispatched ones. Then:
 - **PASS** — criterion is satisfied, with brief evidence
 - **FAIL** — criterion is violated, with `file:line` evidence and a **Fix:** suggestion
 
@@ -275,5 +284,6 @@ Unverified:
 - Anchor your criticisms in specific, concrete concerns — not vague "could be better"
 - If you realize the work has a genuine flaw during assessment, say so clearly
 - **If all criteria pass, emit the appropriate verdict — READY TO SHIP for code, APPROVED for plans. Do not manufacture problems to appear thorough — "do nothing" is a valid and correct outcome.**
+- **If any criteria FAIL, end by offering to fix them and re-run the critique after the fixes.** Fix → re-critique → commit is the intended loop; each critique authorizes exactly one commit.
 - Never skip the session log write
 - The "Unverified" section is MANDATORY — must list at least one thing. If you claim you verified everything, you're lying.

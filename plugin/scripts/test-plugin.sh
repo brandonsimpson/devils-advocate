@@ -19,9 +19,14 @@ trap cleanup EXIT
 PASS=0
 FAIL=0
 
+# --quiet / -q: suppress individual PASS lines; failures and the summary
+# still print. Saves tokens when run by an agent.
+QUIET=0
+if [ "${1:-}" = "--quiet" ] || [ "${1:-}" = "-q" ]; then QUIET=1; fi
+
 # POSIX-safe increments: ((VAR++)) returns exit status 1 when VAR is 0,
 # which kills the script under set -e on bash >= 4.1 (Linux/CI).
-pass() { PASS=$((PASS+1)); printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
+pass() { PASS=$((PASS+1)); [ "$QUIET" -eq 1 ] || printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
 fail() { FAIL=$((FAIL+1)); printf "  \033[31mFAIL\033[0m  %s\n" "$1"; }
 
 echo "Devils Advocate — Test Suite"
@@ -693,6 +698,52 @@ if grep -q '"do nothing" is a valid' "skills/critique/SKILL.md"; then
   pass "skills/critique/SKILL.md documents that all-pass is a valid outcome"
 else
   fail "skills/critique/SKILL.md missing 'do nothing is valid' rule"
+fi
+echo ""
+
+# ---------------------------------------------------------------------------
+# 15. Dispatch self-containment, fix-recheck loop, quiet mode
+# ---------------------------------------------------------------------------
+echo "Dispatch self-containment, fix-recheck loop, quiet mode"
+
+# No hardcoded model in dispatch (inherit session model)
+if grep -q 'model: "opus"' "skills/critique/SKILL.md"; then
+  fail "dispatch template still hardcodes model opus"
+else
+  pass "dispatch template does not hardcode a model"
+fi
+
+# Dispatch template is self-contained: session entry format appears in the
+# template as well as Step 5 (the subagent never sees Step 5)
+ENTRY_COUNT=$(grep -c "Check #N" "skills/critique/SKILL.md" || true)
+if [ "$ENTRY_COUNT" -ge 2 ]; then
+  pass "session entry format present in both dispatch template and Step 5"
+else
+  fail "session entry format appears $ENTRY_COUNT time(s); dispatch template not self-contained"
+fi
+
+# Fix-recheck loop rule present
+if grep -q "re-run the critique" "skills/critique/SKILL.md"; then
+  pass "skills/critique/SKILL.md has fix → re-critique → commit loop rule"
+else
+  fail "skills/critique/SKILL.md missing fix-recheck loop rule"
+fi
+
+# Code-mode eval fixtures exist
+for fixture in code-with-placeholder code-unvalidated-input code-clean; do
+  if [ -f "tests/fixtures/$fixture.md" ]; then
+    pass "eval fixture exists: $fixture.md"
+  else
+    fail "eval fixture missing: $fixture.md"
+  fi
+done
+
+# --quiet suppresses PASS lines but keeps the summary
+QUIET_OUT=$(bash scripts/check-consistency.sh --quiet 2>&1) || true
+if ! echo "$QUIET_OUT" | grep -q "32mPASS" && echo "$QUIET_OUT" | grep -q "Results:"; then
+  pass "check-consistency.sh --quiet suppresses PASS lines, keeps summary"
+else
+  fail "check-consistency.sh --quiet output incorrect"
 fi
 echo ""
 

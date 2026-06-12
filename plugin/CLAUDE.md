@@ -44,8 +44,11 @@ The plugin follows the Claude Code plugin structure:
 Changes are validated by:
 1. Running `bash plugin/scripts/check-consistency.sh` — automated checks for JSON validity, version sync, binary criteria presence, context gate, unverified section, session log references, evidence requirements, and frontmatter description lengths
 2. Running `bash plugin/scripts/test-plugin.sh` — deeper test suite covering plugin metadata, frontmatter validation, binary criteria completeness, session log format, output format structure, hook validation, standards discovery, context gate refusal format, and CLAUDE.md accuracy
-3. Reading the skill Markdown for correctness
-4. Installing the plugin locally and invoking the slash commands
+3. Running `bash plugin/scripts/eval.sh` — live-LLM evals (via `claude -p`, ~2-5 min, costs tokens) that feed planted-bug fixtures from `plugin/tests/fixtures/` through the critique skill and assert it catches them without manufacturing failures on clean work. **Required after any change to `skills/critique/SKILL.md`** — the deterministic suites test what the skill says; evals test what the model does.
+4. Reading the skill Markdown for correctness
+5. Installing the plugin locally and invoking the slash commands
+
+Both shell suites support `--quiet` / `-q` (print only failures and the summary) — prefer it when running them from an agent to save tokens.
 
 To test locally: install the plugin via `claude --plugin-dir ./plugin` from the repo root, then invoke commands like `/devils-advocate:critique` in a project with code changes.
 

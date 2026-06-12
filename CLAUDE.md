@@ -17,7 +17,8 @@ See `plugin/CLAUDE.md` for full project documentation including architecture, co
 
 ## Quick Reference
 
-- **Run consistency checks:** `bash plugin/scripts/check-consistency.sh`
-- **Run test suite:** `bash plugin/scripts/test-plugin.sh`
+- **Run consistency checks:** `bash plugin/scripts/check-consistency.sh` (supports `--quiet`)
+- **Run test suite:** `bash plugin/scripts/test-plugin.sh` (supports `--quiet`)
+- **Run LLM evals (after any SKILL.md change):** `bash plugin/scripts/eval.sh` — live `claude -p` calls, ~2-5 min, costs tokens
 - **Test locally:** `claude --plugin-dir ./plugin`
 - **Version source of truth:** `plugin/.claude-plugin/plugin.json` (must stay in sync with `.claude-plugin/marketplace.json`)

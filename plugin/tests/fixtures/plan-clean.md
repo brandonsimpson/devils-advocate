@@ -2,22 +2,24 @@
 
 ## Overview
 
-Add a `GET /health` endpoint that returns `{ ok: true, version: string }`. No auth required. Used by load balancers and uptime monitors.
+Add a `GET /health` endpoint that returns `{ ok: true, version: string }`. No auth required. Used by load balancers and uptime monitors. Runtime is Node 20 (see Dockerfile).
 
 ## Prerequisites
 
-- Verify `tsconfig.json` has `"resolveJsonModule": true` before Task 1 (`grep resolveJsonModule tsconfig.json`).
+- `hono` and `vitest` are already project dependencies (`package.json`).
+- The deploy environment sets `APP_VERSION` (see `deploy.yml` env block); local dev falls back to `'dev'`.
 
 ## Task 1: Implement the route
 
 ```typescript
 // routes/health.ts
 import { Hono } from 'hono'
-import { version } from '../package.json'
+
+const VERSION = process.env.APP_VERSION ?? 'dev'
 
 export function healthRoutes(app: Hono) {
   app.get('/health', (c) => {
-    return c.json({ ok: true, version: version ?? 'unknown' })
+    return c.json({ ok: true, version: VERSION })
   })
 }
 ```
@@ -46,40 +48,48 @@ describe('GET /health', () => {
 ## Task 2: Register before auth middleware
 
 ```typescript
-// app.ts — must come before authMiddleware()
+// app.ts — health must be registered BEFORE authMiddleware()
+import { Hono } from 'hono'
 import { healthRoutes } from './routes/health'
-healthRoutes(app)  // registered before auth
+import { authMiddleware } from './middleware/auth'
+
+export const app = new Hono()
+healthRoutes(app)                  // registered before auth
 app.use('*', authMiddleware())
+// ... existing protected routes
 ```
 
 ### Tests
 
 ```typescript
-// routes/health.test.ts (add to existing describe block)
-import { Hono } from 'hono'
-import { healthRoutes } from './health'
+// routes/health.integration.test.ts — new file; tests the REAL app composition,
+// not a fresh Hono instance, so a registration-order mistake in app.ts fails here
+import { describe, it, expect } from 'vitest'
+import { app } from '../app'
 
-it('responds 200 without Authorization header', async () => {
-  const app = new Hono()
-  // Register health before a mock auth middleware that rejects all requests
-  healthRoutes(app)
-  app.use('*', async (c, next) => { return c.json({ error: 'unauthorized' }, 401) })
-  const healthRes = await app.request('/health')
-  expect(healthRes.status).toBe(200)
-  const blockedRes = await app.request('/other')
-  expect(blockedRes.status).toBe(401)
+describe('GET /health (integration)', () => {
+  it('responds 200 without an Authorization header on the real app', async () => {
+    const res = await app.request('/health')
+    expect(res.status).toBe(200)
+  })
+
+  it('still blocks unauthenticated requests to protected routes', async () => {
+    const res = await app.request('/orders')
+    expect(res.status).toBe(401)
+  })
 })
 ```
 
 ## Verification
 
 ```bash
-vitest run routes/health.test.ts  # new tests
-vitest run                         # full suite — Task 2 modifies app.ts, check for regressions
+vitest run routes/health.test.ts routes/health.integration.test.ts  # new tests
+vitest run                       # full suite — Task 2 modifies app.ts, check for regressions
+npm run dev & sleep 2 && curl -fsS http://localhost:3000/health     # E2E smoke: real boot, real HTTP
 ```
 
-Both must pass before merging.
+All three must pass before merging.
 
 ## Rollback
 
-Delete `routes/health.ts`, remove the `healthRoutes(app)` import and call from `app.ts`. No migration needed.
+Delete `routes/health.ts` and `routes/health.integration.test.ts`, remove the `healthRoutes(app)` import and call from `app.ts`. No migration needed.

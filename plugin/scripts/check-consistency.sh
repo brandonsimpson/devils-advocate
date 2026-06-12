@@ -11,9 +11,14 @@ PASS=0
 FAIL=0
 WARN=0
 
+# --quiet / -q: suppress individual PASS lines; failures, warnings, and the
+# summary still print. Saves tokens when run by an agent.
+QUIET=0
+if [ "${1:-}" = "--quiet" ] || [ "${1:-}" = "-q" ]; then QUIET=1; fi
+
 # POSIX-safe increments: ((VAR++)) returns exit status 1 when VAR is 0,
 # which kills the script under set -e on bash >= 4.1 (Linux/CI).
-pass() { PASS=$((PASS+1)); printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
+pass() { PASS=$((PASS+1)); [ "$QUIET" -eq 1 ] || printf "  \033[32mPASS\033[0m  %s\n" "$1"; }
 fail() { FAIL=$((FAIL+1)); printf "  \033[31mFAIL\033[0m  %s\n" "$1"; }
 warn() { WARN=$((WARN+1)); printf "  \033[33mWARN\033[0m  %s\n" "$1"; }
 

@@ -3,7 +3,8 @@
 # Uses `claude -p` with the current session's auth — no API key needed.
 # Run from the repo root: bash plugin/scripts/eval.sh
 #
-# All evals run in parallel — wall-clock time is the slowest single eval (~2-5 min).
+# All 6 evals (3 plan-mode, 3 code-mode) run in parallel — wall-clock time is
+# the slowest single eval (~2-5 min).
 # Each eval sends a self-contained fixture through the critique skill and asserts
 # on the output. --disallowedTools Bash prevents the model from running shell
 # commands against the DA repo's filesystem, which causes hangs on fixtures that
@@ -70,9 +71,22 @@ PID2=$!
 (run_plan_critique "tests/fixtures/plan-clean.md" > "$TMPDIR_EVAL/eval3.out" 2>&1) &
 PID3=$!
 
+# Eval 4: code with TODO stubs → no-placeholders FAIL
+(run_code_critique "tests/fixtures/code-with-placeholder.md" > "$TMPDIR_EVAL/eval4.out" 2>&1) &
+PID4=$!
+
+# Eval 5: code with SQL string concatenation → injection criteria FAIL
+(run_code_critique "tests/fixtures/code-unvalidated-input.md" > "$TMPDIR_EVAL/eval5.out" 2>&1) &
+PID5=$!
+
+# Eval 6: clean code → ≥18/20 PASS (slack for criteria the model can't verify
+# without Bash, e.g. actually running the tests)
+(run_code_critique "tests/fixtures/code-clean.md" > "$TMPDIR_EVAL/eval6.out" 2>&1) &
+PID6=$!
+
 # Wait for all. A failed claude call must not abort the script under set -e —
 # the empty-output check in the assert helpers reports it as ERROR instead.
-wait $PID1 $PID2 $PID3 || true
+wait $PID1 $PID2 $PID3 $PID4 $PID5 $PID6 || true
 echo "All evals complete. Checking results..."
 echo ""
 
@@ -158,6 +172,18 @@ echo ""
 
 echo "Eval 3: plan-clean"
 assert_min_pass "$TMPDIR_EVAL/eval3.out" "20" "22" "clean plan passes ≥20/22 (not manufacturing failures)"
+echo ""
+
+echo "Eval 4: code-with-placeholder"
+assert_fail "$TMPDIR_EVAL/eval4.out" "no-placeholders" "catches TODO stubs in code (no-placeholders FAIL)"
+echo ""
+
+echo "Eval 5: code-with-unvalidated-input"
+assert_fail "$TMPDIR_EVAL/eval5.out" "(no-injection|input-validated)" "catches SQL concatenation in code (injection criteria FAIL)"
+echo ""
+
+echo "Eval 6: code-clean"
+assert_min_pass "$TMPDIR_EVAL/eval6.out" "18" "20" "clean code passes ≥18/20 (not manufacturing failures)"
 echo ""
 
 # ---------------------------------------------------------------------------
